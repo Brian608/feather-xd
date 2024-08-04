@@ -11,5 +11,13 @@
 
     <artifactId>feather-xd-user-service</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.feather.xd</groupId>
+            <artifactId>feather-xd-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
 
 </project>
