@@ -1,6 +1,7 @@
 package org.feather.xd.controller;
 
 
+import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -13,8 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
  * @author feather
  * @since 2024-08-04
  */
+@Api(tags = "用户模块")
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/user/v1")
 public class UserController {
 
 }
