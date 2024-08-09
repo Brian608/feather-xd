@@ -1,4 +1,4 @@
-package org.feather.xd.service;
+package org.feather.xd.component;
 
 /**
  * @projectName: feather-xd

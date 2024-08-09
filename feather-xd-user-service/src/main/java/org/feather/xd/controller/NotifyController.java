@@ -5,10 +5,15 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.feather.xd.enums.BizCodeEnum;
+import org.feather.xd.enums.SendCodeEnum;
+import org.feather.xd.service.INotifyService;
 import org.feather.xd.util.CommonUtil;
+import org.feather.xd.util.JsonData;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.imageio.ImageIO;
@@ -39,6 +44,8 @@ public class NotifyController {
 
     private final StringRedisTemplate redisTemplate;
 
+    private final INotifyService notifyService;
+
 
     /**
      * 图形验证码有效期10分钟
@@ -66,6 +73,27 @@ public class NotifyController {
         }
 
     }
+    @ApiOperation("发送邮箱注册验证码")
+    @GetMapping("/send_code")
+    public JsonData sendRegisterCode(@RequestParam(value = "to") String to,
+                                     @RequestParam(value = "captcha") String captcha,
+                                     HttpServletRequest request){
+
+        String key = getCaptchaKey(request);
+        String cacheCaptcha = redisTemplate.opsForValue().get(key);
+
+        //匹配图形验证码是否一样
+        if(captcha != null && captcha.equalsIgnoreCase(cacheCaptcha)){
+            //成功
+            redisTemplate.delete(key);
+            return notifyService.sendCode(SendCodeEnum.USER_REGISTER,to);
+
+        }else{
+            return JsonData.buildResult(BizCodeEnum.CODE_CAPTCHA_ERROR);
+        }
+
+    }
+
 
     /**
      * 获取缓存的key

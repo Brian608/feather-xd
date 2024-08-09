@@ -1,8 +1,8 @@
-package org.feather.xd.service.impl;
+package org.feather.xd.component.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.feather.xd.service.IMailService;
+import org.feather.xd.component.IMailService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
