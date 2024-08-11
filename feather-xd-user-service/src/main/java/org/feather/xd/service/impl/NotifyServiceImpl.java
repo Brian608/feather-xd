@@ -7,10 +7,10 @@ import org.feather.xd.component.IMailService;
 import org.feather.xd.constant.CacheKey;
 import org.feather.xd.enums.BizCodeEnum;
 import org.feather.xd.enums.SendCodeEnum;
+import org.feather.xd.exception.BizException;
 import org.feather.xd.service.INotifyService;
 import org.feather.xd.util.CheckUtil;
 import org.feather.xd.util.CommonUtil;
-import org.feather.xd.util.JsonData;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -63,7 +63,7 @@ public class NotifyServiceImpl implements INotifyService {
      * @return
      */
     @Override
-    public JsonData sendCode(SendCodeEnum sendCodeEnum, String to) {
+    public Boolean sendCode(SendCodeEnum sendCodeEnum, String to) {
 
         String cacheKey = String.format(CacheKey.CHECK_CODE_KEY,sendCodeEnum.name(),to);
 
@@ -75,7 +75,7 @@ public class NotifyServiceImpl implements INotifyService {
             //当前时间戳-验证码发送时间戳，如果小于60秒，则不给重复发送
             if (CommonUtil.getCurrentTimestamp() - ttl < 1000 * 60) {
                 log.info("重复发送,时间间隔:[{}] 秒", (CommonUtil.getCurrentTimestamp() - ttl)/1000);
-                return JsonData.buildCodeAndMsg(BizCodeEnum.CODE_LIMITED.getCode(),BizCodeEnum.CODE_LIMITED.getMessage());
+                throw new BizException(BizCodeEnum.CODE_LIMITED);
             }
 
         }
@@ -91,14 +91,26 @@ public class NotifyServiceImpl implements INotifyService {
             //邮箱验证码
             mailService.sendMail(to,SUBJECT,String.format(CONTENT,code));
 
-            return JsonData.buildSuccess();
+            return true;
 
         } else if(CheckUtil.isPhone(to)){
             //短信验证码
 
         }
 
-        return JsonData.buildResult(BizCodeEnum.CODE_TO_ERROR);
+        return false;
     }
 
+    @Override
+    public boolean checkCode(SendCodeEnum sendCodeEnum, String to, String code) {
+        String cacheKey = String.format(CacheKey.CHECK_CODE_KEY,sendCodeEnum.name(),to);
+        String cacheValue = redisTemplate.opsForValue().get(cacheKey);
+        if (StringUtils.isNotBlank(cacheValue)){
+            if (code.equals(cacheValue.split("_")[0])){
+                redisTemplate.delete(cacheKey);
+                return true;
+            }
+        }
+        return false;
+    }
 }

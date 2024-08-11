@@ -6,13 +6,13 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.feather.xd.enums.BizCodeEnum;
+import org.feather.xd.request.UserRegisterRequest;
 import org.feather.xd.service.IFileService;
-import org.feather.xd.util.JsonData;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.feather.xd.service.IUserService;
+import org.feather.xd.util.JsonResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -31,6 +31,8 @@ public class UserController {
 
     private final IFileService fileService;
 
+    private final IUserService userService;
+
 
     /**
      * 上传用户头像
@@ -42,13 +44,19 @@ public class UserController {
      */
     @ApiOperation("用户头像上传")
     @PostMapping(value = "/upload")
-    public JsonData uploadUserImg(
+    public JsonResult<String> uploadUserImg(
             @ApiParam(value = "文件上传",required = true)
             @RequestPart("file") MultipartFile file){
 
         String result = fileService.uploadUserImg(file);
-        return result!=null? JsonData.buildSuccess(result):JsonData.buildResult(BizCodeEnum.FILE_UPLOAD_USER_IMG_FAIL);
+        return result!=null? JsonResult.buildSuccess(result): JsonResult.buildResult(BizCodeEnum.FILE_UPLOAD_USER_IMG_FAIL);
     }
+    @ApiOperation(value = "注册用户",httpMethod = "POST", produces = "application/json")
+    @PostMapping("/register")
+    public JsonResult<Boolean> register(@ApiParam("用户注册对象") @RequestBody @Validated UserRegisterRequest registerRequest){
+        return JsonResult.buildSuccess( userService.register(registerRequest));
+    }
+
 
 }
 

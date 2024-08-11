@@ -9,7 +9,7 @@ import org.feather.xd.enums.BizCodeEnum;
 import org.feather.xd.enums.SendCodeEnum;
 import org.feather.xd.service.INotifyService;
 import org.feather.xd.util.CommonUtil;
-import org.feather.xd.util.JsonData;
+import org.feather.xd.util.JsonResult;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,15 +69,15 @@ public class NotifyController {
             outputStream.flush();
             outputStream.close();
         } catch (IOException e) {
-            log.error("获取图形验证码异常:[{}]",e);
+            log.error("获取图形验证码异常:[{}]",e.getMessage());
         }
 
     }
     @ApiOperation("发送邮箱注册验证码")
     @GetMapping("/send_code")
-    public JsonData sendRegisterCode(@RequestParam(value = "to") String to,
-                                     @RequestParam(value = "captcha") String captcha,
-                                     HttpServletRequest request){
+    public JsonResult<Boolean> sendRegisterCode(@RequestParam(value = "to") String to,
+                                                @RequestParam(value = "captcha") String captcha,
+                                                HttpServletRequest request){
 
         String key = getCaptchaKey(request);
         String cacheCaptcha = redisTemplate.opsForValue().get(key);
@@ -86,10 +86,10 @@ public class NotifyController {
         if(captcha != null && captcha.equalsIgnoreCase(cacheCaptcha)){
             //成功
             redisTemplate.delete(key);
-            return notifyService.sendCode(SendCodeEnum.USER_REGISTER,to);
+            return JsonResult.buildSuccess(notifyService.sendCode(SendCodeEnum.USER_REGISTER,to));
 
         }else{
-            return JsonData.buildResult(BizCodeEnum.CODE_CAPTCHA_ERROR);
+            return JsonResult.buildResult(BizCodeEnum.CODE_CAPTCHA_ERROR);
         }
 
     }

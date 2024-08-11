@@ -1,7 +1,7 @@
 package org.feather.xd.service;
 
 import org.feather.xd.enums.SendCodeEnum;
-import org.feather.xd.util.JsonData;
+import org.feather.xd.util.JsonResult;
 
 /**
  * @projectName: feather-xd
@@ -14,7 +14,26 @@ import org.feather.xd.util.JsonData;
  */
 public interface INotifyService {
 
-    JsonData sendCode(SendCodeEnum sendCodeEnum, String to);
+    /**
+     * description: 发送验证码
+     * @param sendCodeEnum
+     * @param to
+     * @return {@link JsonResult}
+     * @author: feather
+     * @since: 2024-08-11 16:42
+     **/
+    Boolean sendCode(SendCodeEnum sendCodeEnum, String to);
+
+    /**
+     * description: 验证验证码是否一致
+     * @param sendCodeEnum
+     * @param to
+     * @param code
+     * @return {@link boolean}
+     * @author: feather
+     * @since: 2024-08-11 16:43
+     **/
+    boolean checkCode(SendCodeEnum sendCodeEnum,String to,String code);
 
 
 }
