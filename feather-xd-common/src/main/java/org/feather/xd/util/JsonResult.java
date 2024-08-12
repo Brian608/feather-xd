@@ -75,6 +75,10 @@ public class JsonResult<T> implements   java.io.Serializable {
         return new JsonResult<T>(code, null, msg);
     }
 
+    public static  <T> JsonResult<T> buildError(BizCodeEnum bizCodeEnum) {
+        return new JsonResult<T>(bizCodeEnum.getCode(), null, bizCodeEnum.getMessage());
+    }
+
 
 
     /**

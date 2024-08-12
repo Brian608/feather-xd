@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.feather.xd.enums.BizCodeEnum;
 
+import java.text.MessageFormat;
+
 /**
  * @projectName: feather-xd
  * @package: org.feather.xd.exception
@@ -31,6 +33,13 @@ public class BizException extends  RuntimeException{
         this.code = bizCodeEnum.getCode();
         this.msg = bizCodeEnum.getMessage();
     }
+
+    public BizException(int code, String msg, Object... arguments) {
+        super(MessageFormat.format(msg, arguments));
+        this.code = code;
+        this.msg = MessageFormat.format(msg, arguments);
+    }
+
 
 
 }
