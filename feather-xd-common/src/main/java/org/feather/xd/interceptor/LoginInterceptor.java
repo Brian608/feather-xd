@@ -8,7 +8,6 @@ import org.feather.xd.model.LoginUser;
 import org.feather.xd.util.CommonUtil;
 import org.feather.xd.util.JWTUtil;
 import org.feather.xd.util.JsonResult;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -26,6 +25,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Slf4j
 public class LoginInterceptor  implements HandlerInterceptor {
+
+    public static final ThreadLocal<LoginUser> LOGIN_USER_THREAD_LOCAL = new ThreadLocal<>();
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         log.info("拦截器拦截请求");
@@ -49,6 +50,8 @@ public class LoginInterceptor  implements HandlerInterceptor {
                     .name(name)
                     .id(userId)
                     .mail(mail).build();
+            LOGIN_USER_THREAD_LOCAL.set(loginUser);
+            return true;
         }
         CommonUtil.sendJsonMessage(response, JsonResult.buildResult(BizCodeEnum.ACCOUNT_UNLOGIN));
         return false;
@@ -61,6 +64,6 @@ public class LoginInterceptor  implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+        LOGIN_USER_THREAD_LOCAL.remove();
     }
 }
