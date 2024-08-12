@@ -12,10 +12,12 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -58,14 +60,11 @@ public class GlobalExceptionHandler {
         return JsonResult.buildError(BizCodeEnum.CLIENT_REQUEST_BODY_CHECK_ERROR.getCode(),errorMsg);
     }
     private String handle(List<FieldError> fieldErrors) {
-        StringBuilder sb = new StringBuilder();
+        List<String> errorMsgList=new ArrayList<>();
         for (FieldError obj : fieldErrors) {
-            sb.append(obj.getField());
-            sb.append("=[");
-            sb.append(obj.getDefaultMessage());
-            sb.append("]  ");
+            errorMsgList.add(obj.getDefaultMessage());
         }
-        return sb.toString();
+        return errorMsgList.isEmpty()?"":String.join(",",errorMsgList);
     }
 
     /**

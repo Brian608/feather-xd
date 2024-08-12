@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
 /**
@@ -22,10 +22,10 @@ public class UserLoginRequest {
 
     @ApiModelProperty(value = "邮箱", example = "826813443@qq.com",required = true)
     @Pattern(regexp = "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$",message = "邮箱格式错误")
-    @NotBlank(message = "邮箱不能为空")
+    @NotEmpty(message = "邮箱不能为空")
     private String mail;
 
     @ApiModelProperty(value = "密码", example = "RTEwQURDMzk0OUJBNTlBQkJFNTZFMDU3RjIwRjg4M0U=",required = true)
-    @NotBlank(message = "密码不能为空")
+    @NotEmpty(message = "密码不能为空")
     private String pwd;
 }

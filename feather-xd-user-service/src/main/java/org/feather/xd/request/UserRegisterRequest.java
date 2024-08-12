@@ -5,9 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import javax.validation.constraints.*;
 
 /**
  * @projectName: feather-xd
@@ -23,12 +21,13 @@ import javax.validation.constraints.Pattern;
 public class UserRegisterRequest    {
 
     @ApiModelProperty(value = "昵称",example = "Anna小姐姐",required = true)
-    @NotBlank(message = "昵称不能为空")
+    @Size(max = 50,message = "昵称最长50")
+    @NotEmpty(message = "昵称不能为空")
     private String name;
 
 
     @ApiModelProperty(value = "密码 md5后再base64",name ="password",required = true)
-    @NotBlank(message = "密码不能为空")
+    @NotEmpty(message = "密码不能为空")
     private String pwd;
 
 
@@ -37,6 +36,7 @@ public class UserRegisterRequest    {
     private String headImg;
 
     @ApiModelProperty(value = "用户个人性签名",example = "人生需要动态规划，学习需要贪心算法")
+    @Size(max = 500,message = "用户个人性签名最长500")
     private String slogan;
 
     @ApiModelProperty(value = "0表示女，1表示男",example = "1",required = true)
@@ -45,10 +45,11 @@ public class UserRegisterRequest    {
 
     @ApiModelProperty(value = "邮箱",example = "1112222333338@qq.com",required = true)
     @Pattern(regexp = "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$",message = "邮箱格式错误")
-    @NotBlank(message = "邮箱不能为空")
+    @Size(max = 50,message = "邮箱最长50")
+    @NotEmpty(message = "邮箱不能为空")
     private String mail;
 
     @ApiModelProperty(value = "验证码",example = "232343",required = true)
-    @NotBlank(message = "验证码不能为空")
+    @NotEmpty(message = "验证码不能为空")
     private String code;
 }
