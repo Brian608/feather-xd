@@ -19,6 +19,11 @@ import java.text.MessageFormat;
 @Data
 public class BizException extends  RuntimeException{
 
+    /**
+     * 默认错误码
+     */
+    private static final int DEFAULT_ERROR_CODE = -1;
+
     private int code;
     private String msg;
 
@@ -38,6 +43,11 @@ public class BizException extends  RuntimeException{
         super(MessageFormat.format(msg, arguments));
         this.code = code;
         this.msg = MessageFormat.format(msg, arguments);
+    }
+
+    public BizException(String msg){
+        this.code = DEFAULT_ERROR_CODE;
+        this.msg = msg;
     }
 
 

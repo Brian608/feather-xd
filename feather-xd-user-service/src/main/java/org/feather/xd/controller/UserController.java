@@ -65,6 +65,18 @@ public class UserController {
         return JsonResult.buildSuccess( userService.login(userLoginRequest));
     }
 
+    //    刷新token的方案
+//    @PostMapping("refresh_token")
+//    public JsonResult getRefreshToken(Map<String,Object> param){
+//
+//        //先去redis,找refresh_token是否存在
+//        //refresh_token存在，解密accessToken
+//        //重新调用JWTUtil.geneJsonWebToken() 生成accessToken
+//        //重新生成refresh_token，并存储redis，设置30天过期时间
+//        //返回给前端
+//        return null;
+//    }
+
 
 }
 

@@ -9,12 +9,14 @@ import org.feather.xd.enums.BizCodeEnum;
 import org.feather.xd.enums.SendCodeEnum;
 import org.feather.xd.exception.BizException;
 import org.feather.xd.mapper.UserMapper;
+import org.feather.xd.model.LoginUser;
 import org.feather.xd.model.UserDO;
 import org.feather.xd.request.UserLoginRequest;
 import org.feather.xd.request.UserRegisterRequest;
 import org.feather.xd.service.INotifyService;
 import org.feather.xd.service.IUserService;
 import org.feather.xd.util.CommonUtil;
+import org.feather.xd.util.JWTUtil;
 import org.feather.xd.vo.LoginInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -104,10 +106,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         UserDO userDO = userDOList.get(0);
         String cryptPwd = Md5Crypt.md5Crypt(userLoginRequest.getPwd().getBytes(), userDO.getSecret());
         if (cryptPwd.equals(userDO.getPwd())){
-            //登录成功
-            log.info("登录成功:[{}]",userDO.getMail());
+
             LoginInfo loginInfo=new LoginInfo();
             BeanUtils.copyProperties(userDO,loginInfo);
+            LoginUser loginUser = new LoginUser();
+            BeanUtils.copyProperties(userDO,loginUser);
+            String token = JWTUtil.createToken(loginUser);
+            //登录成功
+            log.info("登录成功:[{}]，token:[{}]",userDO.getMail(),token);
+            loginInfo.setToken(token);
             return loginInfo;
         }else {
             throw new BizException(BizCodeEnum.ACCOUNT_PWD_ERROR);
