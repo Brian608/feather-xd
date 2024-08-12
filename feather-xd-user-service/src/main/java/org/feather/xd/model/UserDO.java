@@ -57,7 +57,7 @@ public class UserDO implements Serializable {
 
 
     @TableField(fill = FieldFill.INSERT)
-    private Date createTime;
+    private Date createdTime;
 
     /**
      * 邮箱

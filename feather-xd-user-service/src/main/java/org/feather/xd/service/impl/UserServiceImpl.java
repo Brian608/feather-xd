@@ -63,7 +63,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         //密码+盐处理
         String cryptPwd = Md5Crypt.md5Crypt(registerRequest.getPwd().getBytes(), userDO.getSecret());
         userDO.setPwd(cryptPwd);
-        userDO.setCreateTime(new Date());
         //TODO 账户唯一性检查
         boolean result = this.save(userDO);
         log.info("注册用户result:[{}],用户信息:[{}]", result,userDO);
