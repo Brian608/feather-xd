@@ -22,12 +22,12 @@ import javax.validation.constraints.Pattern;
 @Data
 public class UserRegisterRequest    {
 
-    @ApiModelProperty(value = "昵称",example = "Anna小姐姐")
+    @ApiModelProperty(value = "昵称",example = "Anna小姐姐",required = true)
     @NotBlank(message = "昵称不能为空")
     private String name;
 
 
-    @ApiModelProperty(value = "密码",example = "12345")
+    @ApiModelProperty(value = "密码 md5后再base64",name ="password",required = true)
     @NotBlank(message = "密码不能为空")
     private String pwd;
 
@@ -39,16 +39,16 @@ public class UserRegisterRequest    {
     @ApiModelProperty(value = "用户个人性签名",example = "人生需要动态规划，学习需要贪心算法")
     private String slogan;
 
-    @ApiModelProperty(value = "0表示女，1表示男",example = "1")
+    @ApiModelProperty(value = "0表示女，1表示男",example = "1",required = true)
     @NotNull(message = "性别不能为空")
     private Integer sex;
 
-    @ApiModelProperty(value = "邮箱",example = "1112222333338@qq.com")
+    @ApiModelProperty(value = "邮箱",example = "1112222333338@qq.com",required = true)
     @Pattern(regexp = "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$",message = "邮箱格式错误")
     @NotBlank(message = "邮箱不能为空")
     private String mail;
 
-    @ApiModelProperty(value = "验证码",example = "232343")
+    @ApiModelProperty(value = "验证码",example = "232343",required = true)
     @NotBlank(message = "验证码不能为空")
     private String code;
 }

@@ -6,10 +6,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.feather.xd.enums.BizCodeEnum;
+import org.feather.xd.request.UserLoginRequest;
 import org.feather.xd.request.UserRegisterRequest;
 import org.feather.xd.service.IFileService;
 import org.feather.xd.service.IUserService;
 import org.feather.xd.util.JsonResult;
+import org.feather.xd.vo.LoginInfo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,6 +57,12 @@ public class UserController {
     @PostMapping("/register")
     public JsonResult<Boolean> register(@ApiParam("用户注册对象") @RequestBody @Validated UserRegisterRequest registerRequest){
         return JsonResult.buildSuccess( userService.register(registerRequest));
+    }
+
+    @ApiOperation(value = "登录",httpMethod = "POST", produces = "application/json")
+    @PostMapping("/login")
+    public JsonResult<LoginInfo> register(@ApiParam("用户登录对象") @RequestBody @Validated UserLoginRequest userLoginRequest){
+        return JsonResult.buildSuccess( userService.login(userLoginRequest));
     }
 
 

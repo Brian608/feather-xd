@@ -10,14 +10,17 @@ import org.feather.xd.enums.SendCodeEnum;
 import org.feather.xd.exception.BizException;
 import org.feather.xd.mapper.UserMapper;
 import org.feather.xd.model.UserDO;
+import org.feather.xd.request.UserLoginRequest;
 import org.feather.xd.request.UserRegisterRequest;
 import org.feather.xd.service.INotifyService;
 import org.feather.xd.service.IUserService;
 import org.feather.xd.util.CommonUtil;
+import org.feather.xd.vo.LoginInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -89,5 +92,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     private void userRegisterInitTask(UserDO userDO) {
 
 
+    }
+
+    @Override
+    public LoginInfo login(UserLoginRequest userLoginRequest) {
+        //检查账户是否已注册
+        List<UserDO> userDOList = this.list(new LambdaQueryWrapper<UserDO>().eq(UserDO::getMail, userLoginRequest.getMail()));
+        if (userDOList.isEmpty()){
+            throw new BizException(BizCodeEnum.ACCOUNT_UNREGISTER);
+        }
+        UserDO userDO = userDOList.get(0);
+        String cryptPwd = Md5Crypt.md5Crypt(userLoginRequest.getPwd().getBytes(), userDO.getSecret());
+        if (cryptPwd.equals(userDO.getPwd())){
+            //登录成功
+            log.info("登录成功:[{}]",userDO.getMail());
+            LoginInfo loginInfo=new LoginInfo();
+            BeanUtils.copyProperties(userDO,loginInfo);
+            return loginInfo;
+        }else {
+            throw new BizException(BizCodeEnum.ACCOUNT_PWD_ERROR);
+        }
     }
 }
