@@ -6,6 +6,7 @@ import org.feather.xd.request.UserLoginRequest;
 import org.feather.xd.request.UserRegisterRequest;
 import org.feather.xd.util.JsonResult;
 import org.feather.xd.vo.LoginInfo;
+import org.feather.xd.vo.UserVO;
 
 /**
  * <p>
@@ -36,4 +37,13 @@ public interface IUserService extends IService<UserDO> {
      * @since: 2024-08-12 10:02
      **/
     LoginInfo login(UserLoginRequest userLoginRequest);
+
+    /**
+     * description: 查询用户详情
+     * @param
+     * @return {@link UserVO}
+     * @author: feather
+     * @since: 2024-08-13 17:22
+     **/
+    UserVO findUserDetail();
 }

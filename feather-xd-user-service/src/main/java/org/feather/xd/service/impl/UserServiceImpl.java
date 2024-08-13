@@ -8,6 +8,7 @@ import org.apache.commons.codec.digest.Md5Crypt;
 import org.feather.xd.enums.BizCodeEnum;
 import org.feather.xd.enums.SendCodeEnum;
 import org.feather.xd.exception.BizException;
+import org.feather.xd.interceptor.LoginInterceptor;
 import org.feather.xd.mapper.UserMapper;
 import org.feather.xd.model.LoginUser;
 import org.feather.xd.model.UserDO;
@@ -18,6 +19,7 @@ import org.feather.xd.service.IUserService;
 import org.feather.xd.util.CommonUtil;
 import org.feather.xd.util.JWTUtil;
 import org.feather.xd.vo.LoginInfo;
+import org.feather.xd.vo.UserVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -119,5 +121,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         }else {
             throw new BizException(BizCodeEnum.ACCOUNT_PWD_ERROR);
         }
+    }
+
+    @Override
+    public UserVO findUserDetail() {
+        LoginUser loginUser = LoginInterceptor.LOGIN_USER_THREAD_LOCAL.get();
+        if (loginUser!=null){
+            UserDO userDO = this.getById(loginUser.getId());
+            UserVO userVO=new UserVO();
+            BeanUtils.copyProperties(userDO,userVO);
+            return userVO;
+        }
+        return null;
     }
 }

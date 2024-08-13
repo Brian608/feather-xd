@@ -12,6 +12,7 @@ import org.feather.xd.service.IFileService;
 import org.feather.xd.service.IUserService;
 import org.feather.xd.util.JsonResult;
 import org.feather.xd.vo.LoginInfo;
+import org.feather.xd.vo.UserVO;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,6 +64,12 @@ public class UserController {
     @PostMapping("/login")
     public JsonResult<LoginInfo> register(@ApiParam("用户登录对象") @RequestBody @Validated UserLoginRequest userLoginRequest){
         return JsonResult.buildSuccess( userService.login(userLoginRequest));
+    }
+
+    @ApiOperation("个人信息查询")
+    @GetMapping("/detail")
+    public JsonResult<UserVO> detail(){
+        return JsonResult.buildSuccess(userService.findUserDetail());
     }
 
     //    刷新token的方案
