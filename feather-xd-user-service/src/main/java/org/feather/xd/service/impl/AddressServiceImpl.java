@@ -1,10 +1,19 @@
 package org.feather.xd.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import lombok.extern.slf4j.Slf4j;
+import org.feather.xd.enums.AddressStatusEnum;
+import org.feather.xd.interceptor.LoginInterceptor;
 import org.feather.xd.model.AddressDO;
 import org.feather.xd.mapper.AddressMapper;
+import org.feather.xd.model.LoginUser;
+import org.feather.xd.request.AddressAddRequest;
 import org.feather.xd.service.IAddressService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -14,7 +23,34 @@ import org.springframework.stereotype.Service;
  * @author feather
  * @since 2024-08-04
  */
+@Slf4j
 @Service
 public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> implements IAddressService {
 
+    @Override
+    public Boolean add(AddressAddRequest request) {
+        LoginUser loginUser = LoginInterceptor.LOGIN_USER_THREAD_LOCAL.get();
+        AddressDO addressDO = new AddressDO();
+        addressDO.setCreateTime(new Date());
+        addressDO.setUserId(loginUser.getId());
+
+        BeanUtils.copyProperties(request,addressDO);
+        //是否有默认收货地址
+        if(addressDO.getDefaultStatus() == AddressStatusEnum.DEFAULT_STATUS.getStatus()){
+            //查找数据库是否有默认地址
+            AddressDO defaultAddressDO = this.getOne (new QueryWrapper<AddressDO>()
+                    .eq("user_id",loginUser.getId())
+                    .eq("default_status",AddressStatusEnum.DEFAULT_STATUS.getStatus()));
+
+            if(defaultAddressDO != null){
+                //修改为非默认收货地址
+                defaultAddressDO.setDefaultStatus(AddressStatusEnum.COMMON_STATUS.getStatus());
+                this.update(defaultAddressDO,new QueryWrapper<AddressDO>().eq("id",defaultAddressDO.getId()));
+            }
+        }
+
+        boolean save = this.save(addressDO);
+        log.info("新增收货地址:result={},data={}",save,addressDO);
+        return save;
+    }
 }
