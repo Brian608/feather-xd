@@ -2,17 +2,16 @@ package org.feather.xd.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.feather.xd.enums.AddressStatusEnum;
 import org.feather.xd.enums.BizCodeEnum;
-import org.feather.xd.exception.BizException;
 import org.feather.xd.interceptor.LoginInterceptor;
-import org.feather.xd.model.AddressDO;
 import org.feather.xd.mapper.AddressMapper;
+import org.feather.xd.model.AddressDO;
 import org.feather.xd.model.LoginUser;
 import org.feather.xd.request.AddressAddRequest;
 import org.feather.xd.service.IAddressService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.feather.xd.util.ParamCheckUtil;
 import org.feather.xd.vo.AddressVO;
 import org.springframework.beans.BeanUtils;
@@ -74,7 +73,8 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
 
     @Override
     public Boolean del(Long id) {
-        return this.removeById(id);
+        LoginUser loginUser = LoginInterceptor.LOGIN_USER_THREAD_LOCAL.get();
+        return this.remove(new LambdaQueryWrapper<AddressDO>().eq(AddressDO::getId,id).eq(AddressDO::getUserId,loginUser.getId()));
     }
 
     @Override
