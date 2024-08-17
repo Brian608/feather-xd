@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.feather.xd.request.AddressAddRequest;
 import org.feather.xd.vo.AddressVO;
 
+import java.util.List;
+
 /**
  * <p>
  * 电商-公司收发货地址表 服务类
@@ -41,4 +43,14 @@ public interface IAddressService extends IService<AddressDO> {
      * @since: 2024-08-17 16:30
      **/
     Boolean del(Long id);
+
+    /**
+     * description:  查找用户全部收货地址
+     * @param
+     * @return {@link List<AddressVO>}
+     * @author: feather
+     * @since: 2024-08-17 16:54
+     **/
+    List<AddressVO> listUserAllAddress();
+
 }

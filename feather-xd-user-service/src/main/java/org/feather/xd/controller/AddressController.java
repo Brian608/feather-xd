@@ -12,6 +12,8 @@ import org.feather.xd.vo.AddressVO;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * <p>
  * 电商-公司收发货地址表 前端控制器
@@ -44,6 +46,12 @@ public class AddressController {
     @DeleteMapping("/del/{id}")
     public JsonResult<Boolean> del(@ApiParam(value = "收获地址id",required = true)@PathVariable Long id){
         return JsonResult.buildSuccess( addressService.del(id));
+    }
+
+    @ApiOperation(value = "查找用户全部收货地址",httpMethod = "GET", produces = "application/json")
+    @GetMapping("/listUserAllAddress")
+    public JsonResult<List<AddressVO>> listUserAllAddress(){
+        return JsonResult.buildSuccess( addressService.listUserAllAddress());
     }
 
 

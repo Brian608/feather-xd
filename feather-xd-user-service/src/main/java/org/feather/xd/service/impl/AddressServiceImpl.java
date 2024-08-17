@@ -1,5 +1,6 @@
 package org.feather.xd.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.feather.xd.enums.AddressStatusEnum;
@@ -18,6 +19,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -72,5 +75,16 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
     @Override
     public Boolean del(Long id) {
         return this.removeById(id);
+    }
+
+    @Override
+    public List<AddressVO> listUserAllAddress() {
+        LoginUser loginUser = LoginInterceptor.LOGIN_USER_THREAD_LOCAL.get();
+        List<AddressDO> list = this.list(new LambdaQueryWrapper<AddressDO>().eq(AddressDO::getUserId,loginUser.getId()).orderByDesc(AddressDO::getCreateTime));
+        return list.stream().map(obj->{
+            AddressVO addressVO = new AddressVO();
+            BeanUtils.copyProperties(obj,addressVO);
+            return addressVO;
+        }).collect(Collectors.toList());
     }
 }
