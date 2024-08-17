@@ -2,6 +2,7 @@ package org.feather.xd.exception;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.feather.xd.constant.CommonConstant;
 import org.feather.xd.enums.BizCodeEnum;
 
 import java.text.MessageFormat;
@@ -19,10 +20,6 @@ import java.text.MessageFormat;
 @Data
 public class BizException extends  RuntimeException{
 
-    /**
-     * 默认错误码
-     */
-    private static final int DEFAULT_ERROR_CODE = -1;
 
     private int code;
     private String msg;
@@ -46,7 +43,7 @@ public class BizException extends  RuntimeException{
     }
 
     public BizException(String msg){
-        this.code = DEFAULT_ERROR_CODE;
+        this.code = CommonConstant.DEFAULT_ERROR_CODE;
         this.msg = msg;
     }
 

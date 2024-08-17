@@ -3,6 +3,7 @@ package org.feather.xd.service;
 import org.feather.xd.model.AddressDO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.feather.xd.request.AddressAddRequest;
+import org.feather.xd.vo.AddressVO;
 
 /**
  * <p>
@@ -23,4 +24,21 @@ public interface IAddressService extends IService<AddressDO> {
      **/
     Boolean add(AddressAddRequest request);
 
+    /**
+     * description: 地址详情
+     * @param id
+     * @return {@link AddressVO}
+     * @author: feather
+     * @since: 2024-08-16 15:42
+     **/
+    AddressVO detail(Long id);
+
+    /**
+     * description: 通过id删除地址
+     * @param id
+     * @return {@link Boolean}
+     * @author: feather
+     * @since: 2024-08-17 16:30
+     **/
+    Boolean del(Long id);
 }

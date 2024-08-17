@@ -3,6 +3,8 @@ package org.feather.xd.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.feather.xd.enums.AddressStatusEnum;
+import org.feather.xd.enums.BizCodeEnum;
+import org.feather.xd.exception.BizException;
 import org.feather.xd.interceptor.LoginInterceptor;
 import org.feather.xd.model.AddressDO;
 import org.feather.xd.mapper.AddressMapper;
@@ -10,6 +12,8 @@ import org.feather.xd.model.LoginUser;
 import org.feather.xd.request.AddressAddRequest;
 import org.feather.xd.service.IAddressService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.feather.xd.util.ParamCheckUtil;
+import org.feather.xd.vo.AddressVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -52,5 +56,21 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, AddressDO> im
         boolean save = this.save(addressDO);
         log.info("新增收货地址:result={},data={}",save,addressDO);
         return save;
+    }
+
+    @Override
+    public AddressVO detail(Long id) {
+        LoginUser loginUser = LoginInterceptor.LOGIN_USER_THREAD_LOCAL.get();
+
+        AddressDO addressDO = this.getOne(new QueryWrapper<AddressDO>().eq("id",id).eq("user_id",loginUser.getId()));
+        ParamCheckUtil.checkObjectNonNull(addressDO,BizCodeEnum.ADDRESS_NO_EXITS);
+        AddressVO addressVO = new AddressVO();
+        BeanUtils.copyProperties(addressDO,addressVO);
+         return   addressVO;
+    }
+
+    @Override
+    public Boolean del(Long id) {
+        return this.removeById(id);
     }
 }

@@ -8,11 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.feather.xd.request.AddressAddRequest;
 import org.feather.xd.service.IAddressService;
 import org.feather.xd.util.JsonResult;
+import org.feather.xd.vo.AddressVO;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -34,6 +32,18 @@ public class AddressController {
     @PostMapping("/add")
     public JsonResult<Boolean> register(@ApiParam("添加收获地址") @RequestBody @Validated AddressAddRequest request){
         return JsonResult.buildSuccess( addressService.add(request));
+    }
+
+    @ApiOperation(value = "通过id查询你用户地址",httpMethod = "GET", produces = "application/json")
+    @GetMapping("/address/{id}")
+    public JsonResult<AddressVO> detail(@ApiParam(value = "收获地址id",required = true)@PathVariable Long id){
+        return JsonResult.buildSuccess( addressService.detail(id));
+    }
+
+    @ApiOperation(value = "通过id删除用户地址",httpMethod = "DELETE", produces = "application/json")
+    @DeleteMapping("/del/{id}")
+    public JsonResult<Boolean> del(@ApiParam(value = "收获地址id",required = true)@PathVariable Long id){
+        return JsonResult.buildSuccess( addressService.del(id));
     }
 
 
