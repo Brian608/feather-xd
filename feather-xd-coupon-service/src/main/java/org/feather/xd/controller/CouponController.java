@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/coupon/v1")
 public class CouponController {
 
-    private ICouponService couponService;
+    private final ICouponService couponService;
 
     @ApiOperation(value = "优惠券分页",httpMethod = "POST", produces = "application/json")
     @PostMapping("/pageCoupon")
