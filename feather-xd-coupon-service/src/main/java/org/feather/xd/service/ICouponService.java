@@ -1,6 +1,7 @@
 package org.feather.xd.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.feather.xd.enums.CouponCategoryEnum;
 import org.feather.xd.model.BasePage;
 import org.feather.xd.model.CouponDO;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -25,6 +26,20 @@ public interface ICouponService extends IService<CouponDO> {
      * @since: 2024-08-21 20:06
      **/
     Page<CouponVO> pageCoupon(CouponQuery query);
+
+
+    /**
+     * description: 领取优惠券
+     * 1：获取优惠券是否存在
+     * 2:是否可以领取 时间  库存 超过限制
+     * 3：扣减库存
+     * 4：保存领取记录
+     * @param couponId
+     * @return
+     * @author: feather
+     * @since: 2024-08-23 16:08
+     **/
+    void getCoupon(long couponId);
 
 
 }
