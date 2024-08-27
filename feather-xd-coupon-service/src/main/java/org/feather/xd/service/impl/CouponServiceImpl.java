@@ -2,8 +2,8 @@ package org.feather.xd.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -13,14 +13,13 @@ import org.feather.xd.enums.CouponPublishEnum;
 import org.feather.xd.enums.CouponStateEnum;
 import org.feather.xd.exception.BizException;
 import org.feather.xd.interceptor.LoginInterceptor;
-import org.feather.xd.model.CouponDO;
 import org.feather.xd.mapper.CouponMapper;
+import org.feather.xd.model.CouponDO;
 import org.feather.xd.model.CouponRecordDO;
 import org.feather.xd.model.LoginUser;
 import org.feather.xd.query.CouponQuery;
 import org.feather.xd.service.ICouponRecordService;
 import org.feather.xd.service.ICouponService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.feather.xd.util.CommonUtil;
 import org.feather.xd.vo.CouponVO;
 import org.springframework.beans.BeanUtils;
@@ -28,8 +27,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -68,6 +65,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, CouponDO> imple
     @Override
     public void getCoupon(long couponId) {
         LoginUser loginUser = LoginInterceptor.LOGIN_USER_THREAD_LOCAL.get();
+        log.info("领劵接口加锁成功:{}",Thread.currentThread().getId());
         CouponDO couponDO = Optional.ofNullable(this.getById(couponId)).orElseThrow(() -> new BizException(BizCodeEnum.COUPON_NO_EXITS));
         //检查优惠券是否可以领取
         this.checkCoupon(loginUser.getId(),couponDO);

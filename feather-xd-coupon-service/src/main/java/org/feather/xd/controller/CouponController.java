@@ -4,6 +4,7 @@ package org.feather.xd.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.feather.xd.query.CouponQuery;
 import org.feather.xd.service.ICouponService;
@@ -36,7 +37,7 @@ public class CouponController {
 
     @ApiOperation(value = "领取优惠券")
     @GetMapping("/getCoupon/{couponId}")
-    public JsonResult<Object> getCoupon(@PathVariable long couponId){
+    public JsonResult<Object> getCoupon(@ApiParam(value = "优惠券id", required = true) @PathVariable long couponId){
         couponService.getCoupon(couponId);
         return JsonResult.buildSuccess( );
     }
