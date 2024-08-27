@@ -10,10 +10,7 @@ import org.feather.xd.service.ICouponService;
 import org.feather.xd.util.JsonResult;
 import org.feather.xd.vo.CouponVO;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -35,6 +32,13 @@ public class CouponController {
     @PostMapping("/pageCoupon")
     public JsonResult<Page<CouponVO>> pageCoupon(@RequestBody @Validated CouponQuery query){
         return JsonResult.buildSuccess( couponService.pageCoupon(query));
+    }
+
+    @ApiOperation(value = "领取优惠券")
+    @GetMapping("/getCoupon/{couponId}")
+    public JsonResult<Object> getCoupon(@PathVariable long couponId){
+        couponService.getCoupon(couponId);
+        return JsonResult.buildSuccess( );
     }
 
 
