@@ -72,7 +72,8 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, CouponDO> imple
         //检查优惠券是否可以领取
         this.checkCoupon(loginUser.getId(),couponDO);
 
-         int rows=  couponMapper.reduceStock(couponId);
+        //假设每个用户每次只能领取一张优惠券
+         int rows=  couponMapper.reduceStock(couponId,1);
 
         if (rows >0) {
             //库存扣减成功才保存记录
