@@ -65,30 +65,41 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, CouponDO> imple
     @Override
     public void getCoupon(long couponId) {
         LoginUser loginUser = LoginInterceptor.LOGIN_USER_THREAD_LOCAL.get();
-        log.info("领劵接口加锁成功:{}",Thread.currentThread().getId());
-        CouponDO couponDO = Optional.ofNullable(this.getById(couponId)).orElseThrow(() -> new BizException(BizCodeEnum.COUPON_NO_EXITS));
-        //检查优惠券是否可以领取
-        this.checkCoupon(loginUser.getId(),couponDO);
+//        String lockKey = "lock:coupon:" + couponId + ":" + loginUser.getId();
+//
+//        RLock lock = redissonClient.getLock(lockKey);
+//        //多个线程进入，会阻塞等待释放锁，默认30秒，然后有watch dog自动续期
+//        lock.lock();
+//        log.info("领劵接口加锁成功:{}",Thread.currentThread().getId());
+//        try {
+            CouponDO couponDO = Optional.ofNullable(this.getById(couponId)).orElseThrow(() -> new BizException(BizCodeEnum.COUPON_NO_EXITS));
+            //检查优惠券是否可以领取
+            this.checkCoupon(loginUser.getId(),couponDO);
 
-        //假设每个用户每次只能领取一张优惠券
-         int rows=  couponMapper.reduceStock(couponId,1);
+            //假设每个用户每次只能领取一张优惠券
+            int rows=  couponMapper.reduceStock(couponId,1);
 
-        if (rows >0) {
-            //库存扣减成功才保存记录
-            //构建领劵记录
-            CouponRecordDO couponRecordDO = new CouponRecordDO();
-            //忽悠优惠券id
-            BeanUtils.copyProperties(couponDO, couponRecordDO,"id");
-            couponRecordDO.setUseState(CouponStateEnum.NEW.name());
-            couponRecordDO.setUserId(loginUser.getId());
-            couponRecordDO.setUserName(loginUser.getName());
-            couponRecordDO.setCouponId(couponId);
-            couponRecordService.save(couponRecordDO);
+            if (rows >0) {
+                //库存扣减成功才保存记录
+                //构建领劵记录
+                CouponRecordDO couponRecordDO = new CouponRecordDO();
+                //忽悠优惠券id
+                BeanUtils.copyProperties(couponDO, couponRecordDO,"id");
+                couponRecordDO.setUseState(CouponStateEnum.NEW.name());
+                couponRecordDO.setUserId(loginUser.getId());
+                couponRecordDO.setUserName(loginUser.getName());
+                couponRecordDO.setCouponId(couponId);
+                couponRecordService.save(couponRecordDO);
 
-        } else {
-            log.warn("领取优惠券失败:[{}],用户:[{}]", couponDO, loginUser);
-            throw new BizException(BizCodeEnum.COUPON_NO_STOCK);
-        }
+            } else {
+                log.warn("领取优惠券失败:[{}],用户:[{}]", couponDO, loginUser);
+                throw new BizException(BizCodeEnum.COUPON_NO_STOCK);
+            }
+//        }catch (Exception e){
+//            lock.unlock();
+//            log.info("解锁成功");
+//        }
+
 
     }
 

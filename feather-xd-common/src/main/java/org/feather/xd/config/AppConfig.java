@@ -4,6 +4,7 @@ import org.redisson.api.RedissonClient;
 import lombok.Data;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -36,6 +37,7 @@ public class AppConfig {
      * @author: feather
      * @since: 2024-08-27 19:01
      **/
+    @Bean
     public RedissonClient redissonClient(){
         Config config=new Config();
         //单机方式
