@@ -1,9 +1,18 @@
 package org.feather.xd.controller;
 
 
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.feather.xd.query.CouponRecordQuery;
+import org.feather.xd.service.ICouponRecordService;
+import org.feather.xd.util.JsonResult;
+import org.feather.xd.vo.CouponRecordVO;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -13,9 +22,29 @@ import org.springframework.web.bind.annotation.RestController;
  * @author feather
  * @since 2024-08-19
  */
+@Slf4j
+@RequiredArgsConstructor
+@Api(tags = "优惠券记录")
 @RestController
-@RequestMapping("/couponRecordDO")
+@RequestMapping("/api/couponRecord/v1")
 public class CouponRecordController {
+
+    private final ICouponRecordService couponRecordService;
+
+
+    @ApiOperation(value = "分页查询优惠券领取记录",httpMethod = "POST", produces = "application/json")
+    @PostMapping("/pageCouponRecord")
+    public JsonResult<Page<CouponRecordVO>> pageCoupon(@RequestBody @Validated CouponRecordQuery query){
+        return JsonResult.buildSuccess( couponRecordService.pageCouponRecord(query));
+    }
+
+    @ApiOperation("查询优惠券记录详情")
+    @GetMapping("detail/{recordId}")
+    public JsonResult<CouponRecordVO> getCouponRecordDetail(@ApiParam(value = "记录id")  @PathVariable("recordId") long recordId){
+       return JsonResult.buildSuccess(couponRecordService.findById(recordId));
+    }
+
+
 
 }
 
