@@ -27,8 +27,10 @@
 <!--    方案一： id是主键索引的前提下，如果每次只是减少1个库存，则可以采用这种方式，只做数据安全校验，可以有效减库存，性能更高，避免大量无用sql，只要有库存就可以操作成功-->
 <!--             update coupon set stock=stock-1 where id = #{couponId} and stock > 0-->
 
+<!--    如果扣减指定个数-->
+<!--           update coupon set stock = stock - #{num} where id = #{couponId} and stock > = #{num}-->
     <update id="reduceStock">
-        update coupon set stock = stock - #{num} where id = #{couponId} and stock > = #{num}
+     update coupon set stock=stock-1 where id = #{couponId} and stock > 0
     </update>
 
 <!--    方案二-->

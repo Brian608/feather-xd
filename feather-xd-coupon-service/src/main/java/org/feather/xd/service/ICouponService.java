@@ -6,6 +6,7 @@ import org.feather.xd.model.BasePage;
 import org.feather.xd.model.CouponDO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.feather.xd.query.CouponQuery;
+import org.feather.xd.request.NewUserCouponRequest;
 import org.feather.xd.vo.CouponVO;
 
 /**
@@ -40,6 +41,15 @@ public interface ICouponService extends IService<CouponDO> {
      * @since: 2024-08-23 16:08
      **/
     void getCoupon(long couponId);
+
+    /**
+     * description: 新用户注册发放优惠券
+     * @param newUserCouponRequest
+     * @return
+     * @author: feather
+     * @since: 2024-09-05 10:57
+     **/
+    void initNewUserCoupon(NewUserCouponRequest newUserCouponRequest);
 
 
 }

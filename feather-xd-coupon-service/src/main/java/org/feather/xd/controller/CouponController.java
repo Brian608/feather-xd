@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.feather.xd.interceptor.LoginInterceptor;
 import org.feather.xd.model.LoginUser;
 import org.feather.xd.query.CouponQuery;
+import org.feather.xd.request.NewUserCouponRequest;
 import org.feather.xd.service.ICouponService;
 import org.feather.xd.util.JsonResult;
 import org.feather.xd.vo.CouponVO;
@@ -60,6 +61,18 @@ public class CouponController {
             log.info("解锁成功");
         }
         return JsonResult.buildSuccess( );
+    }
+
+    /**
+     * 新用户注册发放优惠券接口
+     *
+     * @return
+     */
+    @ApiOperation("RPC-新用户注册接口")
+    @PostMapping("/new_user_coupon")
+    public JsonResult<Object> addNewUserCoupon(@ApiParam("用户对象") @RequestBody @Validated NewUserCouponRequest newUserCouponRequest) {
+       couponService.initNewUserCoupon(newUserCouponRequest);
+        return JsonResult.buildSuccess();
     }
 
 

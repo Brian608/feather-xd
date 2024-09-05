@@ -1,12 +1,10 @@
 package org.feather.xd.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.feather.xd.model.CouponRecordDO;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.feather.xd.query.CouponQuery;
+import org.feather.xd.model.CouponRecordDO;
 import org.feather.xd.query.CouponRecordQuery;
 import org.feather.xd.vo.CouponRecordVO;
-import org.feather.xd.vo.CouponVO;
 
 /**
  * <p>

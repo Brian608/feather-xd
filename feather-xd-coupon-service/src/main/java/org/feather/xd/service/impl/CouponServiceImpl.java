@@ -18,6 +18,7 @@ import org.feather.xd.model.CouponDO;
 import org.feather.xd.model.CouponRecordDO;
 import org.feather.xd.model.LoginUser;
 import org.feather.xd.query.CouponQuery;
+import org.feather.xd.request.NewUserCouponRequest;
 import org.feather.xd.service.ICouponRecordService;
 import org.feather.xd.service.ICouponService;
 import org.feather.xd.util.CommonUtil;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -77,7 +79,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, CouponDO> imple
             this.checkCoupon(loginUser.getId(),couponDO);
 
             //假设每个用户每次只能领取一张优惠券
-            int rows=  couponMapper.reduceStock(couponId,1);
+            int rows=  couponMapper.reduceStock(couponId);
 
             if (rows >0) {
                 //库存扣减成功才保存记录
@@ -101,6 +103,24 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, CouponDO> imple
 //        }
 
 
+    }
+
+    @Transactional(rollbackFor=Exception.class,propagation=Propagation.REQUIRED)
+    @Override
+    public void initNewUserCoupon(NewUserCouponRequest newUserCouponRequest) {
+        LoginUser loginUser = new LoginUser();
+        loginUser.setId(newUserCouponRequest.getUserId());
+        loginUser.setName(newUserCouponRequest.getName());
+        LoginInterceptor.LOGIN_USER_THREAD_LOCAL.set(loginUser);
+
+        //查询新用户有哪些优惠券
+        List<CouponDO> couponDOList = this.list(
+                new LambdaQueryWrapper<CouponDO>().eq(CouponDO::getCategory, CouponCategoryEnum.NEW_USER.name())
+        );
+        for (CouponDO couponDO : couponDOList) {
+            //幂等操作，调用需要加锁
+            this.getCoupon(couponDO.getId());
+        }
     }
 
     private void checkCoupon(Long userId, CouponDO couponDO) {

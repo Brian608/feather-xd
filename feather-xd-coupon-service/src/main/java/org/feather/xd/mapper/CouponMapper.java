@@ -21,5 +21,5 @@ public interface CouponMapper extends BaseMapper<CouponDO> {
      * @author: feather
      * @since: 2024-08-23 16:45
      **/
-    int reduceStock(@Param("couponId") long couponId,@Param("num") int num);
+    int reduceStock(@Param("couponId") long couponId);
 }
