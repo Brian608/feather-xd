@@ -19,7 +19,7 @@ public interface IBannerService extends IService<BannerDO> {
     /**
      * description: 轮播图列表
      * @param
-     * @return {@link List< BannerVO>}
+     * @return {@link List<BannerVO>}
      * @author: feather
      * @since: 2024-09-06 11:44
      **/
