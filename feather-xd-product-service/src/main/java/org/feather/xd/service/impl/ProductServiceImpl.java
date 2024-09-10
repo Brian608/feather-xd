@@ -2,6 +2,7 @@ package org.feather.xd.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.feather.xd.enums.BizCodeEnum;
 import org.feather.xd.exception.BizException;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -44,5 +46,12 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, ProductDO> im
     public ProductVO findDetailById(long productId) {
         ProductDO productDO = Optional.ofNullable(this.getById(productId)).orElseThrow(() -> new BizException("商品不存在"));
         return BeanUtil.copyProperties(productDO, ProductVO.class);
+    }
+
+    @Override
+    public List<ProductVO> findProductsByIdBatch(List<Long> productIdList) {
+        List<ProductDO> productDOList =  this.list(new LambdaQueryWrapper<ProductDO>().in(ProductDO::getId,productIdList));
+
+        return BeanUtil.copyToList(productDOList, ProductVO.class);
     }
 }

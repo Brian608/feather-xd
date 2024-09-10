@@ -6,11 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.feather.xd.request.CartItemRequest;
 import org.feather.xd.service.ICarService;
 import org.feather.xd.util.JsonResult;
+import org.feather.xd.vo.CartVO;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @projectName: feather-xd
@@ -36,5 +34,19 @@ public class CarController {
         carService.addToCart(cartItemRequest);
         return JsonResult.buildSuccess( );
     }
+
+    @ApiOperation("清空购物车")
+    @DeleteMapping("/clear")
+    public JsonResult<Object> cleanMyCart(){
+        carService.clear();
+        return JsonResult.buildSuccess();
+    }
+
+    @ApiOperation("查看我的购物车")
+    @GetMapping("/mycart")
+    public JsonResult<CartVO> getMyCart(){
+        return JsonResult.buildSuccess(carService.getMyCart());
+    }
+
 
 }

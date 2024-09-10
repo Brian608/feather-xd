@@ -1,6 +1,7 @@
 package org.feather.xd.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.feather.xd.constant.CacheKey;
@@ -10,12 +11,18 @@ import org.feather.xd.request.CartItemRequest;
 import org.feather.xd.service.ICarService;
 import org.feather.xd.service.IProductService;
 import org.feather.xd.vo.CartItemVO;
+import org.feather.xd.vo.CartVO;
 import org.feather.xd.vo.ProductVO;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @projectName: feather-xd
@@ -85,5 +92,66 @@ public class CarServiceImpl implements ICarService {
     private  String getCarKey(){
         LoginUser loginUser = LoginInterceptor.LOGIN_USER_THREAD_LOCAL.get();
         return String.format(CacheKey.CART_KEY,loginUser.getId());
+    }
+
+    @Override
+    public void clear() {
+        redisTemplate.delete(this.getCarKey());
+    }
+
+    @Override
+    public CartVO getMyCart() {
+        //获取全部购物项
+        List<CartItemVO> cartItemVOList = buildCartItem(false);
+
+        //封装成cartvo
+        CartVO cartVO = new CartVO();
+        cartVO.setCartItems(cartItemVOList);
+
+        return cartVO;
+    }
+
+    private List<CartItemVO> buildCartItem(boolean latestPrice) {
+        BoundHashOperations<String,Object,Object> myCart = getMyCartOps();
+        List<Object> itemList = myCart.values();
+        if (CollectionUtils.isEmpty(itemList)){
+            return null;
+        }
+        List<CartItemVO> cartItemVOList=new ArrayList<>();
+
+        //拼接id列表查询最新价格
+        List<Long> productIdList=new ArrayList<>();
+         itemList.forEach(item->{
+             CartItemVO cartItemVO = JSON.parseObject((String)item,CartItemVO.class);
+             cartItemVOList.add(cartItemVO);
+
+             productIdList.add(cartItemVO.getProductId());
+
+         });
+        //查询最新的商品价格
+        if(latestPrice){
+
+            setProductLatestPrice(cartItemVOList,productIdList);
+        }
+        return  cartItemVOList;
+
+    }
+
+    private void setProductLatestPrice(List<CartItemVO> cartItemVOList, List<Long> productIdList) {
+        //批量查询
+        List<ProductVO> productVOList = productService.findProductsByIdBatch(productIdList);
+
+        //分组
+        Map<Long,ProductVO> maps = productVOList.stream().collect(Collectors.toMap(ProductVO::getId, Function.identity()));
+
+
+        cartItemVOList.forEach(item->{
+
+            ProductVO productVO = maps.get(item.getProductId());
+            item.setProductTitle(productVO.getTitle());
+            item.setProductImg(productVO.getCoverImg());
+            item.setAmount(productVO.getAmount());
+
+        });
     }
 }

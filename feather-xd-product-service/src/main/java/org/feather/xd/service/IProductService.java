@@ -6,6 +6,8 @@ import org.feather.xd.model.ProductDO;
 import org.feather.xd.query.ProductQuery;
 import org.feather.xd.vo.ProductVO;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务类
@@ -35,4 +37,10 @@ public interface IProductService extends IService<ProductDO> {
      **/
     ProductVO findDetailById(long productId);
 
+    /**
+     * 根据id批量查询商品
+     * @param productIdList
+     * @return
+     */
+    List<ProductVO> findProductsByIdBatch(List<Long> productIdList);
 }
