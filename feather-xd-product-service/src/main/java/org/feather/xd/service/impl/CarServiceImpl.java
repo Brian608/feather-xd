@@ -5,11 +5,14 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.feather.xd.constant.CacheKey;
+import org.feather.xd.enums.BizCodeEnum;
+import org.feather.xd.exception.BizException;
 import org.feather.xd.interceptor.LoginInterceptor;
 import org.feather.xd.model.LoginUser;
 import org.feather.xd.request.CartItemRequest;
 import org.feather.xd.service.ICarService;
 import org.feather.xd.service.IProductService;
+import org.feather.xd.util.ParamCheckUtil;
 import org.feather.xd.vo.CartItemVO;
 import org.feather.xd.vo.CartVO;
 import org.feather.xd.vo.ProductVO;
@@ -109,6 +112,23 @@ public class CarServiceImpl implements ICarService {
         cartVO.setCartItems(cartItemVOList);
 
         return cartVO;
+    }
+
+    @Override
+    public void deleteItem(Long productId) {
+        BoundHashOperations<String, Object, Object> myCartOps = getMyCartOps();
+        myCartOps.delete(productId);
+    }
+
+    @Override
+    public void changeItemNum(CartItemRequest cartItemRequest) {
+        BoundHashOperations<String, Object, Object> myCartOps = getMyCartOps();
+        Object o = myCartOps.get(cartItemRequest.getProductId());
+        ParamCheckUtil.checkObjectNonNull(o, BizCodeEnum.CART_FAIL);
+        String obj=(String) o;
+        CartItemVO cartItemVO = JSON.parseObject(obj, CartItemVO.class);
+        cartItemVO.setBuyNum(cartItemRequest.getBuyNum());
+        myCartOps.put(cartItemRequest.getProductId(),JSON.toJSONString(cartItemVO));
     }
 
     private List<CartItemVO> buildCartItem(boolean latestPrice) {

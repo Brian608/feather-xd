@@ -6,6 +6,7 @@ import lombok.Data;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 /**
  * @projectName: feather-xd
@@ -18,7 +19,7 @@ import javax.validation.constraints.NotNull;
  */
 @ApiModel
 @Data
-public class CartItemRequest {
+public class CartItemRequest implements Serializable {
 
     @ApiModelProperty(value = "商品id",example = "11")
     @NotNull(message = "商品id不能为空")

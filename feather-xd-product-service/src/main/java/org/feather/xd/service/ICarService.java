@@ -40,4 +40,24 @@ public interface ICarService {
      * @since: 2024-09-10 17:32
      **/
     CartVO getMyCart();
+
+
+    /**
+     * description: 删除购物项
+     * @param productId
+     * @return
+     * @author: feather
+     * @since: 2024-09-11 10:50
+     **/
+    void  deleteItem(Long productId);
+
+    /**
+     * description: 修改购物车数量
+     * @param cartItemRequest
+     * @return
+     * @author: feather
+     * @since: 2024-09-11 11:05
+     **/
+
+    void changeItemNum(CartItemRequest cartItemRequest);
 }
