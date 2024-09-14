@@ -8,22 +8,24 @@ import org.apache.commons.codec.digest.Md5Crypt;
 import org.feather.xd.enums.BizCodeEnum;
 import org.feather.xd.enums.SendCodeEnum;
 import org.feather.xd.exception.BizException;
+import org.feather.xd.feign.CouponFeignClient;
 import org.feather.xd.interceptor.LoginInterceptor;
 import org.feather.xd.mapper.UserMapper;
 import org.feather.xd.model.LoginUser;
 import org.feather.xd.model.UserDO;
+import org.feather.xd.request.NewUserCouponRequest;
 import org.feather.xd.request.UserLoginRequest;
 import org.feather.xd.request.UserRegisterRequest;
 import org.feather.xd.service.INotifyService;
 import org.feather.xd.service.IUserService;
 import org.feather.xd.util.CommonUtil;
 import org.feather.xd.util.JWTUtil;
+import org.feather.xd.util.JsonResult;
 import org.feather.xd.vo.LoginInfo;
 import org.feather.xd.vo.UserVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,6 +41,8 @@ import java.util.List;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements IUserService {
     private final INotifyService notifyService;
+
+    private final CouponFeignClient couponFeignService;
 
 
     /**
@@ -94,7 +98,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
      * @param userDO
      */
     private void userRegisterInitTask(UserDO userDO) {
-
+        NewUserCouponRequest request=new NewUserCouponRequest(userDO.getId(),userDO.getName());
+        JsonResult<Object> jsonResult = couponFeignService.addNewUserCoupon(request);
+        log.info("新用户[{}],注册发放优惠券结果:[{}]",request,jsonResult);
 
     }
 

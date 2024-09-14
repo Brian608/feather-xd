@@ -27,7 +27,6 @@ public class NewUserCouponRequest implements Serializable {
 
 
     @ApiModelProperty(value = "用户Id",example = "19")
-    @JsonProperty("user_id")
     @NotNull(message = "用户id不能为空")
     private long userId;
 

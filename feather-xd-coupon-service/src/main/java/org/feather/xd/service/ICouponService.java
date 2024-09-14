@@ -1,8 +1,6 @@
 package org.feather.xd.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.feather.xd.enums.CouponCategoryEnum;
-import org.feather.xd.model.BasePage;
 import org.feather.xd.model.CouponDO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.feather.xd.query.CouponQuery;
