@@ -10,6 +10,17 @@ spring:
         server-addr: 127.0.0.1:8848 #Nacos配置中心地址
         file-extension: yaml #文件拓展格式
         namespace: 14662171-d30c-4727-9869-6c89e9fdc914
+    #消息队列
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    virtual-host: /xd
+    password: guest
+    username: guest
+    #开启手动确认消息
+    listener:
+      simple:
+        acknowledge-mode: manual
 
 
 #数据库配置
