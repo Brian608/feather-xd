@@ -12,7 +12,6 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ConstraintViolation;
@@ -26,7 +25,7 @@ import java.util.List;
  * @package: org.feather.xd.exception
  * @className: ExceptionHandler
  * @author: feather
- * @description:
+ * @description: 全局异常 ，如果在分布式事务下，配置了全局异常 ，分布式事务不生效，因为A服务发生异常 会认为是正确的，SeaTa不会捕获到
  * @since: 2024-08-09 16:41
  * @version: 1.0
  */

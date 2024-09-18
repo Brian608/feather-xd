@@ -35,13 +35,13 @@ logging:
   level:
     root: INFO
 #seata配置
-seata:
-  tx-service-group: ${spring.application.name}-group
-  service:
-    grouplist:
-      xdclass: 127.0.0.1:8091
-
-    vgroup-mapping:
-      feather-xd-coupon-service-group: feather-xd
+#seata:
+#  tx-service-group: ${spring.application.name}-group
+#  service:
+#    grouplist:
+#      xdclass: 127.0.0.1:8091
+#
+#    vgroup-mapping:
+#      feather-xd-coupon-service-group: feather-xd
 
 
