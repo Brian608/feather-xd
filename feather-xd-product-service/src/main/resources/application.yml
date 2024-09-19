@@ -14,7 +14,7 @@ spring:
   rabbitmq:
     host: 127.0.0.1
     port: 5672
-    virtual-host: /xd
+    virtual-host: /
     password: guest
     username: guest
     #开启手动确认消息
