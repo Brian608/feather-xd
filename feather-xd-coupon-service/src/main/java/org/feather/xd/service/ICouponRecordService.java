@@ -3,9 +3,11 @@ package org.feather.xd.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.feather.xd.model.CouponRecordDO;
+import org.feather.xd.model.CouponRecordMessage;
 import org.feather.xd.query.CouponRecordQuery;
 import org.feather.xd.request.LockCouponRequest;
 import org.feather.xd.vo.CouponRecordVO;
+import org.springframework.amqp.core.Message;
 
 /**
  * <p>
@@ -48,5 +50,15 @@ public interface ICouponRecordService extends IService<CouponRecordDO> {
      **/
    void lockCouponRecords(LockCouponRequest request);
 
+   /**
+    * description: 释放优惠券记录
+    * 1：查询task 表是否存在
+    * 2：查询状态
+    * @param recordMessage
+    * @return {@link boolean}
+    * @author: feather
+    * @since: 2024-09-29 15:11
+    **/
 
+    boolean releaseCouponRecord(CouponRecordMessage recordMessage);
 }

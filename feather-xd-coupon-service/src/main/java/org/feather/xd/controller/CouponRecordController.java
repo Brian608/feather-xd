@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.feather.xd.query.CouponRecordQuery;
+import org.feather.xd.request.LockCouponRequest;
 import org.feather.xd.service.ICouponRecordService;
 import org.feather.xd.util.JsonResult;
 import org.feather.xd.vo.CouponRecordVO;
@@ -42,6 +43,13 @@ public class CouponRecordController {
     @GetMapping("detail/{recordId}")
     public JsonResult<CouponRecordVO> getCouponRecordDetail(@ApiParam(value = "记录id")  @PathVariable("recordId") long recordId){
        return JsonResult.buildSuccess(couponRecordService.findById(recordId));
+    }
+
+    @ApiOperation(value = "RPC-锁定优惠券",httpMethod = "POST", produces = "application/json")
+    @PostMapping("/lockCouponRecords")
+    public JsonResult<Object> lockCouponRecords(@RequestBody @Validated LockCouponRequest request){
+        couponRecordService.lockCouponRecords(request);
+        return JsonResult.buildSuccess( );
     }
 
 

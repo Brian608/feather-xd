@@ -5,32 +5,36 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.C;
 import org.feather.xd.config.RabbitMQConfig;
 import org.feather.xd.enums.BizCodeEnum;
 import org.feather.xd.enums.CouponStateEnum;
+import org.feather.xd.enums.ProductOrderStateEnum;
 import org.feather.xd.enums.StockTaskStateEnum;
 import org.feather.xd.exception.BizException;
+import org.feather.xd.feign.ProductOrderFeignService;
 import org.feather.xd.interceptor.LoginInterceptor;
-import org.feather.xd.model.CouponRecordDO;
 import org.feather.xd.mapper.CouponRecordMapper;
+import org.feather.xd.model.CouponRecordDO;
 import org.feather.xd.model.CouponRecordMessage;
 import org.feather.xd.model.CouponTaskDO;
 import org.feather.xd.model.LoginUser;
 import org.feather.xd.query.CouponRecordQuery;
 import org.feather.xd.request.LockCouponRequest;
 import org.feather.xd.service.ICouponRecordService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.feather.xd.service.ICouponTaskService;
+import org.feather.xd.util.JsonResult;
 import org.feather.xd.vo.CouponRecordVO;
-import org.feather.xd.vo.CouponVO;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -52,6 +56,8 @@ public class CouponRecordServiceImpl extends ServiceImpl<CouponRecordMapper, Cou
     private final RabbitTemplate rabbitTemplate;
 
     private final RabbitMQConfig rabbitMQConfig;
+
+    private final ProductOrderFeignService productOrderFeignService;
     @Override
     public Page<CouponRecordVO> pageCouponRecord(CouponRecordQuery query) {
         LoginUser loginUser = LoginInterceptor.LOGIN_USER_THREAD_LOCAL.get();
@@ -112,6 +118,57 @@ public class CouponRecordServiceImpl extends ServiceImpl<CouponRecordMapper, Cou
             log.info("优惠券锁定消息发送成功:[{}]",couponRecordMessage);
         }
 
+
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean releaseCouponRecord(CouponRecordMessage recordMessage) {
+        CouponTaskDO couponTaskDO = couponTaskService.getById(recordMessage.getTaskId());
+        if (Objects.isNull(couponTaskDO)){
+            log.warn("工作单不存在,消息:[{}]",recordMessage);
+            return true;
+        }
+        //lock 状态才处理
+        if (couponTaskDO.getLockState().equalsIgnoreCase(StockTaskStateEnum.LOCK.name())){
+            log.warn("工作单状态错误,消息:[{}]",recordMessage);
+          // 查询订单状态
+            JsonResult<String> jsonResult = productOrderFeignService.queryProductOrderState(recordMessage.getOutTradeNo());
+            if (jsonResult.getCode().equals(200)){
+                //正常响应 判断订单状态
+                String state = jsonResult.getData().toString();
+                if (ProductOrderStateEnum.NEW.name().equalsIgnoreCase(state)){
+                    //订单是NEw状态，则返回消息队列，重新创建
+                    log.warn("订单状态是NEW,返回给消息队列，重新投递:{}",recordMessage);
+                    return false;
+                }
+                //已支付
+                if (ProductOrderStateEnum.PAY.name().equalsIgnoreCase(state)){
+                    //订单是PAYED状态，则更新优惠券状态为已使用
+                    couponTaskDO.setLockState(StockTaskStateEnum.FINISH.name());
+                    couponTaskService.update(
+                            new LambdaQueryWrapper<CouponTaskDO>().eq(CouponTaskDO::getId,recordMessage.getTaskId())
+                    );
+                    log.info("订单已经支付，修改库存锁定工作单FINISH状态:{}",recordMessage);
+                    return true;
+                }
+
+            }
+            //订单不存在，或者订单被取消，确认消息,修改task状态为CANCEL,恢复优惠券使用记录为NEW
+            log.warn("订单不存在，或者订单被取消，确认消息,修改task状态为CANCEL,恢复优惠券使用记录为NEW,message:{}",recordMessage);
+                couponTaskDO.setLockState(StockTaskStateEnum.CANCEL.name());
+
+            couponTaskService.update(new LambdaQueryWrapper<CouponTaskDO>().eq(CouponTaskDO::getId,recordMessage.getTaskId()));
+            //恢复优惠券记录是NEW状态
+            LambdaUpdateWrapper<CouponRecordDO> updateWrapper=new LambdaUpdateWrapper<>();
+            updateWrapper.eq(CouponRecordDO::getId,recordMessage.getMessageId());
+            updateWrapper.set(CouponRecordDO::getUseState,CouponStateEnum.NEW.name());
+            this.update(updateWrapper);
+            return true;
+        }else {
+            log.warn("工作单状态不是LOCK,state={},消息体={}",couponTaskDO.getLockState(),recordMessage);
+            return  true;
+        }
 
     }
 }
