@@ -136,7 +136,7 @@ public class CouponRecordServiceImpl extends ServiceImpl<CouponRecordMapper, Cou
             JsonResult<String> jsonResult = productOrderFeignService.queryProductOrderState(recordMessage.getOutTradeNo());
             if (jsonResult.getCode().equals(200)){
                 //正常响应 判断订单状态
-                String state = jsonResult.getData().toString();
+                String state = jsonResult.getData();
                 if (ProductOrderStateEnum.NEW.name().equalsIgnoreCase(state)){
                     //订单是NEw状态，则返回消息队列，重新创建
                     log.warn("订单状态是NEW,返回给消息队列，重新投递:{}",recordMessage);
