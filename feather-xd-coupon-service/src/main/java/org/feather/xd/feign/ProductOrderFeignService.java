@@ -22,6 +22,6 @@ public interface ProductOrderFeignService {
      * @param outTradeNo
      * @return
      */
-    @GetMapping("/api/order/v1/query_state")
+    @GetMapping("/api/order/v1/queryProductOrderState")
     JsonResult<String> queryProductOrderState(@RequestParam("out_trade_no")String outTradeNo);
 }

@@ -39,4 +39,12 @@ public interface IProductOrderService extends IService<ProductOrderDO> {
      * @since: 2024-09-12 10:10
      **/
     void confirmOrder(ConfirmOrderRequest request, HttpServletResponse response);
+
+
+    /**
+     * 查询订单状态
+     * @param outTradeNo
+     * @return
+     */
+    String queryProductOrderState(String outTradeNo);
 }

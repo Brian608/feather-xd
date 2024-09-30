@@ -1,8 +1,11 @@
 package org.feather.xd.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.feather.xd.enums.BizCodeEnum;
 import org.feather.xd.enums.ClientType;
 import org.feather.xd.enums.ProductOrderPayTypeEnum;
+import org.feather.xd.exception.BizException;
 import org.feather.xd.model.ProductOrderDO;
 import org.feather.xd.mapper.ProductOrderMapper;
 import org.feather.xd.request.ConfirmOrderRequest;
@@ -11,7 +14,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.text.html.Option;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * <p>
@@ -59,5 +64,9 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
         }
     }
 
-
+    @Override
+    public String queryProductOrderState(String outTradeNo) {
+        ProductOrderDO productOrderDO = Optional.ofNullable(this.baseMapper.selectOne(new LambdaQueryWrapper<ProductOrderDO>().eq(ProductOrderDO::getOutTradeNo, outTradeNo))).orElseThrow(() -> new BizException(BizCodeEnum.ORDER_CONFIRM_NOT_EXIST));
+        return productOrderDO.getState();
+    }
 }
