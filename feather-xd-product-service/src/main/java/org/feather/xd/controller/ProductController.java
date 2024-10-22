@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.feather.xd.query.ProductQuery;
+import org.feather.xd.request.LockProductRequest;
 import org.feather.xd.service.IProductService;
 import org.feather.xd.util.JsonResult;
 import org.feather.xd.vo.ProductVO;
@@ -40,6 +41,12 @@ public class ProductController {
     @GetMapping("/detail/{product_id}")
     public JsonResult<ProductVO> detail(@ApiParam(value = "商品id",required = true) @PathVariable("product_id") long productId){
         return JsonResult.buildSuccess(productService.findDetailById(productId));
+    }
+
+    @ApiOperation("锁定商品库存")
+    @PostMapping("/lockProductStock")
+    public JsonResult<Boolean> lockProductStock(@RequestBody LockProductRequest request){
+        return JsonResult.buildSuccess(productService.lockProductStock(request));
     }
 
 }

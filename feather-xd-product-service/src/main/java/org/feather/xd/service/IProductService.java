@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.feather.xd.model.ProductDO;
 import org.feather.xd.query.ProductQuery;
+import org.feather.xd.request.LockProductRequest;
 import org.feather.xd.vo.ProductVO;
 
 import java.util.List;
@@ -43,4 +44,16 @@ public interface IProductService extends IService<ProductDO> {
      * @return
      */
     List<ProductVO> findProductsByIdBatch(List<Long> productIdList);
+
+    /**
+     * description: 锁定商品库存
+     * 1.)遍历商品 锁定每个商品
+     * 2.) 每一次锁定的时候，都要发送延迟消息
+     * @param request
+     * @return {@link Boolean}
+     * @author: feather
+     * @since: 2024-10-12 15:18
+     **/
+
+    Boolean lockProductStock(LockProductRequest request);
 }
