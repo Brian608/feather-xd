@@ -8,8 +8,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.feather.xd.config.RabbitMQConfig;
 import org.feather.xd.enums.BizCodeEnum;
+import org.feather.xd.enums.ProductOrderStateEnum;
 import org.feather.xd.enums.StockTaskStateEnum;
 import org.feather.xd.exception.BizException;
+import org.feather.xd.feign.ProductOrderFeignService;
 import org.feather.xd.model.ProductDO;
 import org.feather.xd.mapper.ProductMapper;
 import org.feather.xd.model.ProductMessage;
@@ -20,6 +22,7 @@ import org.feather.xd.request.OrderItemRequest;
 import org.feather.xd.service.IProductService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.feather.xd.service.IProductTaskService;
+import org.feather.xd.util.JsonResult;
 import org.feather.xd.vo.ProductVO;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
@@ -50,6 +53,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, ProductDO> im
     private final RabbitTemplate rabbitTemplate;
 
     private  final RabbitMQConfig rabbitMQConfig;
+
+    private final ProductOrderFeignService orderFeignService;
 
     @Override
     public Page<ProductVO> pageProduct(ProductQuery query) {
@@ -112,5 +117,44 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, ProductDO> im
         }
 
         return true;
+    }
+
+    @Override
+    public boolean releaseProductStock(ProductMessage productMessage) {
+        ProductTaskDO taskDO = Optional.ofNullable(productTaskService.getById(productMessage.getTaskId())).orElseThrow(() -> new BizException("工作单不存在"));
+        //lock  状态才处理
+        if (StockTaskStateEnum.LOCK.name().equalsIgnoreCase(taskDO.getLockState())){
+            JsonResult<String> jsonResult = orderFeignService.queryProductOrderState(productMessage.getOutTradeNo());
+            if (jsonResult.getCode().equals(200)){
+                String state = jsonResult.getData();
+                if (ProductOrderStateEnum.NEW.name().equalsIgnoreCase(state)){
+                    //状态是new 新建状态，则返回消息队列，重新投递
+                    log.warn("订单状态是NEW,返回给消息队列，重新投递:{}",productMessage);
+                    return false;
+                }
+                //如果是已支付状态
+                if (ProductOrderStateEnum.PAY.name().equalsIgnoreCase(state)){
+                    //如果已支付，修改task 状态为finish
+                    taskDO.setLockState(StockTaskStateEnum.FINISH.name());
+                    productTaskService.updateById(taskDO);
+                    log.info("订单已经支付，修改库存锁定工作单FINISH状态:{}",productMessage);
+                    return true;
+                }
+
+            }
+            //订单不存在。或者被取消，确认消息，修改task 状态为CANCEL，恢复优惠券使用记录为NEW
+            log.warn("订单不存在，或者订单被取消，确认消息,修改task状态为CANCEL,恢复优惠券使用记录为NEW,message:{}",productMessage);
+            taskDO.setLockState(StockTaskStateEnum.CANCEL.name());
+            productTaskService.updateById(taskDO);
+            //恢复商品库存，集锁定库存的值减去当前购买的值
+            productMapper.unlockProductStock(taskDO.getProductId(),taskDO.getBuyNum());
+
+            return true;
+
+        }else {
+            log.warn("工作单状态不是LOCK,state={},消息体={}",taskDO.getLockState(),productMessage);
+            return true;
+        }
+
     }
 }

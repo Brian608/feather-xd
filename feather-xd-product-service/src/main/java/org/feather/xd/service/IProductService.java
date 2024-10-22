@@ -3,6 +3,7 @@ package org.feather.xd.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.feather.xd.model.ProductDO;
+import org.feather.xd.model.ProductMessage;
 import org.feather.xd.query.ProductQuery;
 import org.feather.xd.request.LockProductRequest;
 import org.feather.xd.vo.ProductVO;
@@ -56,4 +57,13 @@ public interface IProductService extends IService<ProductDO> {
      **/
 
     Boolean lockProductStock(LockProductRequest request);
+
+    /**
+     * description: 释放商品库存
+     * @param productMessage
+     * @return {@link boolean}
+     * @author: feather
+     * @since: 2024-10-22 15:49
+     **/
+    boolean releaseProductStock(ProductMessage productMessage);
 }
