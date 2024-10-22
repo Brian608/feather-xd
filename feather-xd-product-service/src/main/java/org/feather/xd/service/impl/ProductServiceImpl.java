@@ -6,11 +6,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.feather.xd.config.RabbitMQConfig;
 import org.feather.xd.enums.BizCodeEnum;
 import org.feather.xd.enums.StockTaskStateEnum;
 import org.feather.xd.exception.BizException;
 import org.feather.xd.model.ProductDO;
 import org.feather.xd.mapper.ProductMapper;
+import org.feather.xd.model.ProductMessage;
 import org.feather.xd.model.ProductTaskDO;
 import org.feather.xd.query.ProductQuery;
 import org.feather.xd.request.LockProductRequest;
@@ -19,6 +21,7 @@ import org.feather.xd.service.IProductService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.feather.xd.service.IProductTaskService;
 import org.feather.xd.vo.ProductVO;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,6 +46,10 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, ProductDO> im
     private final ProductMapper productMapper;
 
     private final IProductTaskService  productTaskService;
+
+    private final RabbitTemplate rabbitTemplate;
+
+    private  final RabbitMQConfig rabbitMQConfig;
 
     @Override
     public Page<ProductVO> pageProduct(ProductQuery query) {
@@ -95,11 +102,13 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, ProductDO> im
                 log.info("商品库存锁定-插入商品product_task结果:【{}】,taskInfo:[{}]",
                         result,taskDO);
                 //发送延迟消息
-
-
+                ProductMessage productMessage=new ProductMessage();
+                productMessage.setOutTradeNo(orderOutTradeNo);
+                productMessage.setTaskId(taskDO.getId());
+                rabbitTemplate.convertAndSend(rabbitMQConfig.getEventExchange(),rabbitMQConfig.getStockReleaseDelayRoutingKey(),productMessage);
+                log.info("商品库存锁定信息延迟消息发送成功:{}",productMessage);
 
             }
-
         }
 
         return true;
