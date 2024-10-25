@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.feather.xd.config.RabbitMQConfig;
+import org.feather.xd.constant.CommonConstant;
 import org.feather.xd.enums.BizCodeEnum;
 import org.feather.xd.enums.ProductOrderStateEnum;
 import org.feather.xd.enums.StockTaskStateEnum;
@@ -125,7 +126,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, ProductDO> im
         //lock  状态才处理
         if (StockTaskStateEnum.LOCK.name().equalsIgnoreCase(taskDO.getLockState())){
             JsonResult<String> jsonResult = orderFeignService.queryProductOrderState(productMessage.getOutTradeNo());
-            if (jsonResult.getCode().equals(200)){
+            if (jsonResult.getCode().equals(CommonConstant.SUCCESS_CODE)){
                 String state = jsonResult.getData();
                 if (ProductOrderStateEnum.NEW.name().equalsIgnoreCase(state)){
                     //状态是new 新建状态，则返回消息队列，重新投递

@@ -1,8 +1,11 @@
 package org.feather.xd.util;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.feather.xd.constant.CommonConstant;
 import org.feather.xd.enums.BizCodeEnum;
 
 /**
@@ -20,11 +23,7 @@ import org.feather.xd.enums.BizCodeEnum;
 public class JsonResult<T> implements   java.io.Serializable {
     private static final long serialVersionUID = 1L;
 
-    private static final String SUCCESS_MSG = "success";
 
-    private static final int SUCCESS_CODE = 200;
-
-    private static final int ERROR_CODE = -1;
     /**
      * 状态码 0 表示成功
      */
@@ -40,13 +39,12 @@ public class JsonResult<T> implements   java.io.Serializable {
     private String msg;
 
 
-
     /**
      * 成功，不传入数据
      * @return
      */
     public static <T> JsonResult<T> buildSuccess() {
-        return new JsonResult<T>(SUCCESS_CODE, null, SUCCESS_MSG);
+        return new JsonResult<T>(CommonConstant.SUCCESS_CODE, null, CommonConstant.SUCCESS_MSG);
     }
 
     /**
@@ -55,7 +53,7 @@ public class JsonResult<T> implements   java.io.Serializable {
      * @return
      */
     public static <T> JsonResult<T> buildSuccess(T data) {
-        return new JsonResult<T>(SUCCESS_CODE, data, SUCCESS_MSG);
+        return new JsonResult<T>(CommonConstant.SUCCESS_CODE, data, CommonConstant.SUCCESS_MSG);
     }
 
     /**
@@ -64,7 +62,7 @@ public class JsonResult<T> implements   java.io.Serializable {
      * @return
      */
     public static  <T> JsonResult<T> buildError(String msg) {
-        return new JsonResult<T>(ERROR_CODE, null, msg);
+        return new JsonResult<T>(CommonConstant.ERROR_CODE, null, msg);
     }
     /**
      * 失败，传入描述code 和错误信息

@@ -5,6 +5,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.feather.xd.constant.CommonConstant;
+import org.feather.xd.enums.ClientType;
+import org.feather.xd.enums.ProductOrderPayTypeEnum;
 import org.feather.xd.request.ConfirmOrderRequest;
 import org.feather.xd.service.IProductOrderService;
 import org.feather.xd.util.JsonResult;
@@ -12,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * @projectName: feather-xd
@@ -34,9 +38,37 @@ public class ProductOrderController {
     @ApiOperation("提交订单")
     @PostMapping("/confirmOrder")
     public  void confirmOrder(@RequestBody @Validated ConfirmOrderRequest request , HttpServletResponse response){
+        JsonResult jsonResult = orderService.confirmOrder(request);
+        if ( jsonResult.getCode().equals(CommonConstant.SUCCESS_CODE)){
+            String clientType = request.getClientType();
+            String payType = request.getPayType();
+            //如果是支付宝支付  都是跳转网页 ，APP除外
+            if (ProductOrderPayTypeEnum.ALIPAY.name().equalsIgnoreCase(payType)){
+                log.info("创建支付宝订单成功:[{}]",request);
 
-        orderService.confirmOrder(request,response);
+                //H5支付
+                if (ClientType.H5.name().equalsIgnoreCase(clientType)){
+                    writeData(response);
+                } else if (ClientType.APP.name().equalsIgnoreCase(clientType)) {
+                    //TODO APP SDK支付
+                }
 
+            } else if (ProductOrderPayTypeEnum.WECHAT.name().equalsIgnoreCase(payType)) {
+                //TODO 微信支付
+            }
+        }
+
+    }
+    private void writeData(HttpServletResponse response) {
+
+        try {
+            response.setContentType("text/html;charset=UTF8");
+            response.getWriter().write("请支付");
+            response.getWriter().flush();
+            response.getWriter().close();
+        } catch (IOException e) {
+            log.error("写出Html异常:[{}]", e.getMessage());
+        }
     }
 
     /**

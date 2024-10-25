@@ -11,8 +11,15 @@ package org.feather.xd.constant;
  */
 public interface CommonConstant {
 
+
+
+
+     String SUCCESS_MSG = "success";
+
+    int SUCCESS_CODE = 200;
+
     /**
      * 默认错误码
      */
-     int DEFAULT_ERROR_CODE = -1;
+     int ERROR_CODE = -1;
 }

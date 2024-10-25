@@ -13,7 +13,6 @@ import org.feather.xd.model.LoginUser;
 import org.feather.xd.request.AddressAddRequest;
 import org.feather.xd.service.IAddressService;
 import org.feather.xd.util.ParamCheckUtil;
-import org.feather.xd.vo.AddressVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 

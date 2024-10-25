@@ -3,6 +3,7 @@ package org.feather.xd.service;
 import org.feather.xd.model.ProductOrderDO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.feather.xd.request.ConfirmOrderRequest;
+import org.feather.xd.util.JsonResult;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,7 +39,7 @@ public interface IProductOrderService extends IService<ProductOrderDO> {
      * @author: feather
      * @since: 2024-09-12 10:10
      **/
-    void confirmOrder(ConfirmOrderRequest request, HttpServletResponse response);
+    JsonResult confirmOrder(ConfirmOrderRequest request);
 
 
     /**

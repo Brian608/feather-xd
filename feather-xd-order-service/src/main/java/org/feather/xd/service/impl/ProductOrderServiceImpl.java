@@ -1,16 +1,27 @@
 package org.feather.xd.service.impl;
 
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.feather.xd.constant.CommonConstant;
 import org.feather.xd.enums.BizCodeEnum;
 import org.feather.xd.enums.ClientType;
 import org.feather.xd.enums.ProductOrderPayTypeEnum;
 import org.feather.xd.exception.BizException;
+import org.feather.xd.feign.UserFeignService;
+import org.feather.xd.interceptor.LoginInterceptor;
+import org.feather.xd.model.LoginUser;
 import org.feather.xd.model.ProductOrderDO;
 import org.feather.xd.mapper.ProductOrderMapper;
 import org.feather.xd.request.ConfirmOrderRequest;
 import org.feather.xd.service.IProductOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.feather.xd.util.CommonUtil;
+import org.feather.xd.util.JsonResult;
+import org.feather.xd.vo.AddressVO;
+import org.feather.xd.vo.ProductOrderAddressVO;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
@@ -26,43 +37,45 @@ import java.util.Optional;
  * @author feather
  * @since 2024-09-11
  */
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, ProductOrderDO> implements IProductOrderService {
+    private final UserFeignService userFeignService;
 
 
     @Override
-    public void confirmOrder(ConfirmOrderRequest request,HttpServletResponse response) {
+    public JsonResult confirmOrder(ConfirmOrderRequest request) {
+        LoginUser loginUser = LoginInterceptor.LOGIN_USER_THREAD_LOCAL.get();
+        String orderOutTradeNo = CommonUtil.getStringNumRandom(32);
 
-        String clientType = request.getClientType();
-        String payType = request.getPayType();
-        //如果是支付宝支付  都是跳转网页 ，APP除外
-        if (ProductOrderPayTypeEnum.ALIPAY.name().equalsIgnoreCase(payType)){
-            log.info("创建支付宝订单成功:[{}]",request);
+        ProductOrderAddressVO addressVO=this.getUserAddress( request.getAddressId());
+        log.info("收获地址信息:[{}]",addressVO);
+        return JsonResult.buildSuccess();
 
-            //H5支付
-            if (ClientType.H5.name().equalsIgnoreCase(clientType)){
-                writeData(response);
-            } else if (ClientType.APP.name().equalsIgnoreCase(clientType)) {
-                //TODO APP SDK支付
-            }
-
-        } else if (ProductOrderPayTypeEnum.WECHAT.name().equalsIgnoreCase(payType)) {
-            //TODO 微信支付
-        }
 
     }
-    private void writeData(HttpServletResponse response) {
 
-        try {
-            response.setContentType("text/html;charset=UTF8");
-            response.getWriter().write("请支付");
-            response.getWriter().flush();
-            response.getWriter().close();
-        } catch (IOException e) {
-            log.error("写出Html异常:[{}]", e.getMessage());
+    /**
+     * description: 获取收获地址详情
+     * @param addressId
+     * @return {@link ProductOrderAddressVO}
+     * @author: feather
+     * @since: 2024-10-24 21:33
+     **/
+    private ProductOrderAddressVO getUserAddress(long addressId) {
+        JsonResult<AddressVO> jsonResult = userFeignService.detail(addressId);
+        if (!jsonResult.getCode().equals(CommonConstant.SUCCESS_CODE)){
+            log.error("获取收获地址失败，msg:[{}]",jsonResult);
+            throw  new BizException(BizCodeEnum.ADDRESS_NO_EXITS);
         }
+        AddressVO addressVO = jsonResult.getData();
+        ProductOrderAddressVO productOrderAddressVO = new ProductOrderAddressVO();
+        BeanUtils.copyProperties(addressVO,productOrderAddressVO);
+        return productOrderAddressVO;
     }
+
+
 
     @Override
     public String queryProductOrderState(String outTradeNo) {

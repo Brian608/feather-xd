@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.feather.xd.config.RabbitMQConfig;
+import org.feather.xd.constant.CommonConstant;
 import org.feather.xd.enums.BizCodeEnum;
 import org.feather.xd.enums.CouponStateEnum;
 import org.feather.xd.enums.ProductOrderStateEnum;
@@ -131,7 +132,7 @@ public class CouponRecordServiceImpl extends ServiceImpl<CouponRecordMapper, Cou
             log.warn("工作单状态错误,消息:[{}]",recordMessage);
           // 查询订单状态
             JsonResult<String> jsonResult = productOrderFeignService.queryProductOrderState(recordMessage.getOutTradeNo());
-            if (jsonResult.getCode().equals(200)){
+            if (jsonResult.getCode().equals(CommonConstant.SUCCESS_CODE)){
                 //正常响应 判断订单状态
                 String state = jsonResult.getData();
                 if (ProductOrderStateEnum.NEW.name().equalsIgnoreCase(state)){
