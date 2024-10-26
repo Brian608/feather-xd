@@ -1,7 +1,10 @@
 package org.feather.xd.service;
 
 import org.feather.xd.request.CartItemRequest;
+import org.feather.xd.vo.CartItemVO;
 import org.feather.xd.vo.CartVO;
+
+import java.util.List;
 
 /**
  * @projectName: feather-xd
@@ -60,4 +63,15 @@ public interface ICarService {
      **/
 
     void changeItemNum(CartItemRequest cartItemRequest);
+
+    /**
+     * description:   用于订单服务，确认订单，获取对应的商品项详情信息
+     *      *
+     *      * 会清空购物车的商品数据
+     * @param productIdList
+     * @return {@link List< CartItemVO>}
+     * @author: feather
+     * @since: 2024-10-26 10:24
+     **/
+    List<CartItemVO> confirmOrderCartItems(List<Long> productIdList);
 }

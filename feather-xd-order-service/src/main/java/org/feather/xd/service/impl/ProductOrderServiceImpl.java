@@ -1,12 +1,14 @@
 package org.feather.xd.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.feather.xd.constant.CommonConstant;
 import org.feather.xd.enums.BizCodeEnum;
 import org.feather.xd.exception.BizException;
+import org.feather.xd.feign.ProductOrderFeignService;
 import org.feather.xd.feign.UserFeignService;
 import org.feather.xd.interceptor.LoginInterceptor;
 import org.feather.xd.mapper.ProductOrderMapper;
@@ -17,10 +19,12 @@ import org.feather.xd.service.IProductOrderService;
 import org.feather.xd.util.CommonUtil;
 import org.feather.xd.util.JsonResult;
 import org.feather.xd.vo.AddressVO;
+import org.feather.xd.vo.CartItemVO;
 import org.feather.xd.vo.ProductOrderAddressVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -37,6 +41,8 @@ import java.util.Optional;
 public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, ProductOrderDO> implements IProductOrderService {
     private final UserFeignService userFeignService;
 
+    private  final ProductOrderFeignService productOrderFeignService;
+
 
     @Override
     public JsonResult confirmOrder(ConfirmOrderRequest request) {
@@ -45,6 +51,16 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
 
         ProductOrderAddressVO addressVO=this.getUserAddress( request.getAddressId());
         log.info("收获地址信息:[{}]",addressVO);
+        List<Long> productIdList = request.getProductIdList();
+        JsonResult<List<CartItemVO>> jsonResult=  productOrderFeignService.confirmOrderCartItem(productIdList);
+        if (!jsonResult.getCode().equals(CommonConstant.SUCCESS_CODE)){
+            List<CartItemVO> cartItemVOList = jsonResult.getData();
+            if (CollectionUtils.isEmpty(cartItemVOList)){
+                //购物车商品数据不存在
+                throw  new BizException(BizCodeEnum.ORDER_CONFIRM_CART_ITEM_NOT_EXIST);
+            }
+
+        }
         return JsonResult.buildSuccess();
 
 

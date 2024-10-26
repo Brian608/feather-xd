@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.feather.xd.constant.CacheKey;
 import org.feather.xd.enums.BizCodeEnum;
-import org.feather.xd.exception.BizException;
 import org.feather.xd.interceptor.LoginInterceptor;
 import org.feather.xd.model.LoginUser;
 import org.feather.xd.request.CartItemRequest;
@@ -173,5 +172,23 @@ public class CarServiceImpl implements ICarService {
             item.setAmount(productVO.getAmount());
 
         });
+    }
+
+    @Override
+    public List<CartItemVO> confirmOrderCartItems(List<Long> productIdList) {
+        //获取购物测全部购物项
+        List<CartItemVO> cartItemVOList = buildCartItem(true);
+        //根据需要的商品进行过滤 并清空对应的购物项
+        if (CollectionUtils.isNotEmpty(cartItemVOList)){
+            return cartItemVOList.stream().filter(obj -> {
+                if (productIdList.contains(obj.getProductId())) {
+                    this.deleteItem(obj.getProductId());
+                    return true;
+                }
+                return false;
+            }).collect(Collectors.toList());
+        }
+        return  null;
+
     }
 }

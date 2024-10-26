@@ -1,7 +1,9 @@
 package org.feather.xd.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
@@ -14,6 +16,8 @@ import java.math.BigDecimal;
  * @since: 2024-09-10 10:46
  * @version: 1.0
  */
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class CartItemVO {
     /**

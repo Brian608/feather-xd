@@ -7,9 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.feather.xd.request.CartItemRequest;
 import org.feather.xd.service.ICarService;
 import org.feather.xd.util.JsonResult;
+import org.feather.xd.vo.CartItemVO;
 import org.feather.xd.vo.CartVO;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @projectName: feather-xd
@@ -63,6 +66,13 @@ public class CarController {
         carService.changeItemNum(cartItemRequest);
 
         return JsonResult.buildSuccess();
+    }
+
+    @ApiOperation("获取对应订单的商品信息")
+    @PostMapping("/confirm_order_cart_items")
+    public JsonResult<List<CartItemVO>> confirmOrderCartItems(@ApiParam("商品id列表") @RequestBody List<Long> productIdList){
+        return JsonResult.buildSuccess(carService.confirmOrderCartItems(productIdList));
+
     }
 
 
