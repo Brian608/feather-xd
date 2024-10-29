@@ -5,9 +5,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.feather.xd.model.CouponRecordDO;
 import org.feather.xd.model.CouponRecordMessage;
 import org.feather.xd.query.CouponRecordQuery;
-import org.feather.xd.request.LockCouponRequest;
+import org.feather.xd.request.LockCouponRecordRequest;
 import org.feather.xd.vo.CouponRecordVO;
-import org.springframework.amqp.core.Message;
 
 /**
  * <p>
@@ -48,7 +47,7 @@ public interface ICouponRecordService extends IService<CouponRecordDO> {
      * @author: feather
      * @since: 2024-09-18 15:55
      **/
-   void lockCouponRecords(LockCouponRequest request);
+   void lockCouponRecords(LockCouponRecordRequest request);
 
    /**
     * description: 释放优惠券记录

@@ -22,7 +22,7 @@ import org.feather.xd.model.CouponRecordMessage;
 import org.feather.xd.model.CouponTaskDO;
 import org.feather.xd.model.LoginUser;
 import org.feather.xd.query.CouponRecordQuery;
-import org.feather.xd.request.LockCouponRequest;
+import org.feather.xd.request.LockCouponRecordRequest;
 import org.feather.xd.service.ICouponRecordService;
 import org.feather.xd.service.ICouponTaskService;
 import org.feather.xd.util.JsonResult;
@@ -82,7 +82,7 @@ public class CouponRecordServiceImpl extends ServiceImpl<CouponRecordMapper, Cou
     }
 
     @Override
-    public void lockCouponRecords(LockCouponRequest request) {
+    public void lockCouponRecords(LockCouponRecordRequest request) {
         LoginUser loginUser = LoginInterceptor.LOGIN_USER_THREAD_LOCAL.get();
         String orderOutTradeNo = request.getOrderOutTradeNo();
         List<Long> lockCouponRecordIds = request.getLockCouponRecordIds();

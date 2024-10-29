@@ -1,5 +1,6 @@
 package org.feather.xd.feign;
 
+import org.feather.xd.request.LockProductRequest;
 import org.feather.xd.util.JsonResult;
 import org.feather.xd.vo.CartItemVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -27,6 +28,14 @@ public interface ProductOrderFeignService {
      */
     @PostMapping("/api/cart/v1/confirm_order_cart_items")
     JsonResult<List<CartItemVO>> confirmOrderCartItem(@RequestBody List<Long> productIdList);
+
+    /**
+     * 锁定商品购物项库存
+     * @param lockProductRequest
+     * @return
+     */
+    @PostMapping("/api/product/v1/lockProductStock")
+    JsonResult<Boolean> lockProductStock(@RequestBody LockProductRequest lockProductRequest);
 
 
 }

@@ -18,7 +18,7 @@ import java.util.List;
  */
 @ApiModel(value = "优惠券锁定对象",description = "优惠券锁定对象")
 @Data
-public class LockCouponRequest implements Serializable {
+public class LockCouponRecordRequest implements Serializable {
 
     /**
      * 优惠券记录id列表
