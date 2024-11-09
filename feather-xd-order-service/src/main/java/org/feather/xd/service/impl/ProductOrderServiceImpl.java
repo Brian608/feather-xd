@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.feather.xd.config.RabbitMQConfig;
 import org.feather.xd.constant.CommonConstant;
 import org.feather.xd.enums.*;
 import org.feather.xd.exception.BizException;
@@ -15,6 +16,7 @@ import org.feather.xd.feign.UserFeignService;
 import org.feather.xd.interceptor.LoginInterceptor;
 import org.feather.xd.mapper.ProductOrderMapper;
 import org.feather.xd.model.LoginUser;
+import org.feather.xd.model.OrderMessage;
 import org.feather.xd.model.ProductOrderDO;
 import org.feather.xd.model.ProductOrderItemDO;
 import org.feather.xd.request.ConfirmOrderRequest;
@@ -29,6 +31,7 @@ import org.feather.xd.vo.AddressVO;
 import org.feather.xd.vo.CartItemVO;
 import org.feather.xd.vo.CouponRecordVO;
 import org.feather.xd.vo.ProductOrderAddressVO;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -55,6 +58,10 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     private final CouponFeignService couponFeignService;
 
     private  final IProductOrderItemService productOrderItemService;
+
+    private final RabbitMQConfig rabbitMQConfig;
+
+    private final RabbitTemplate rabbitTemplate;
 
 
     @Override
@@ -84,6 +91,9 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
             //创建订单项
             this.saveProductOrderItems(orderOutTradeNo,productOrderDO.getId(),cartItemVOList);
             //发送延迟消息， 用于自动关单
+            OrderMessage orderMessage=new OrderMessage();
+            orderMessage.setOutTradeNo(orderOutTradeNo);
+            rabbitTemplate.convertAndSend(rabbitMQConfig.getEventExchange(),rabbitMQConfig.getOrderCloseDelayRoutingKey(),orderMessage);
 
             //创建支付
 
