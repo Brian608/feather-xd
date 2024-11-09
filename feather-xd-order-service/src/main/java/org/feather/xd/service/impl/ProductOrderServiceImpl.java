@@ -1,13 +1,13 @@
 package org.feather.xd.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.feather.xd.constant.CommonConstant;
-import org.feather.xd.enums.BizCodeEnum;
-import org.feather.xd.enums.CouponStateEnum;
+import org.feather.xd.enums.*;
 import org.feather.xd.exception.BizException;
 import org.feather.xd.feign.CouponFeignService;
 import org.feather.xd.feign.ProductOrderFeignService;
@@ -16,10 +16,12 @@ import org.feather.xd.interceptor.LoginInterceptor;
 import org.feather.xd.mapper.ProductOrderMapper;
 import org.feather.xd.model.LoginUser;
 import org.feather.xd.model.ProductOrderDO;
+import org.feather.xd.model.ProductOrderItemDO;
 import org.feather.xd.request.ConfirmOrderRequest;
 import org.feather.xd.request.LockCouponRecordRequest;
 import org.feather.xd.request.LockProductRequest;
 import org.feather.xd.request.OrderItemRequest;
+import org.feather.xd.service.IProductOrderItemService;
 import org.feather.xd.service.IProductOrderService;
 import org.feather.xd.util.CommonUtil;
 import org.feather.xd.util.JsonResult;
@@ -31,10 +33,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -54,6 +53,8 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     private  final ProductOrderFeignService productOrderFeignService;
 
     private final CouponFeignService couponFeignService;
+
+    private  final IProductOrderItemService productOrderItemService;
 
 
     @Override
@@ -79,12 +80,78 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
             this.lockProductStocks(cartItemVOList,orderOutTradeNo);
 
             //创建订单
+            ProductOrderDO productOrderDO = this.saveProductOrder(request, loginUser, orderOutTradeNo, addressVO);
+            //创建订单项
+            this.saveProductOrderItems(orderOutTradeNo,productOrderDO.getId(),cartItemVOList);
+            //发送延迟消息， 用于自动关单
 
             //创建支付
 
         }
         return JsonResult.buildSuccess();
 
+
+    }
+
+    private void saveProductOrderItems(String orderOutTradeNo, Long orderId, List<CartItemVO> cartItemVOList) {
+        List<ProductOrderItemDO> orderItemDOList = cartItemVOList.stream().map(
+                obj->{
+                    ProductOrderItemDO itemDO = new ProductOrderItemDO();
+                    itemDO.setBuyNum(obj.getBuyNum());
+                    itemDO.setProductId(obj.getProductId());
+                    itemDO.setProductImg(obj.getProductImg());
+                    itemDO.setProductName(obj.getProductTitle());
+
+                    itemDO.setOutTradeNo(orderOutTradeNo);
+
+                    //单价
+                    itemDO.setAmount(obj.getAmount());
+                    //总价
+                    itemDO.setTotalAmount(obj.getTotalAmount());
+                    itemDO.setProductOrderId(orderId);
+                    return itemDO;
+                }
+        ).collect(Collectors.toList());
+
+
+        productOrderItemService.saveBatch(orderItemDOList);
+
+    }
+
+    /**
+     * description: 创建订单
+     * @param request
+     * @param loginUser
+     * @param orderOutTradeNo
+     * @param addressVO
+     * @return
+     * @author: feather
+     * @since: 2024-11-09 12:36
+     **/
+
+    private ProductOrderDO saveProductOrder(ConfirmOrderRequest request, LoginUser loginUser, String orderOutTradeNo, ProductOrderAddressVO addressVO) {
+        ProductOrderDO productOrderDO = new ProductOrderDO();
+        productOrderDO.setUserId(loginUser.getId());
+        productOrderDO.setHeadImg(loginUser.getHeadImg());
+        productOrderDO.setNickname(loginUser.getName());
+
+        productOrderDO.setOutTradeNo(orderOutTradeNo);
+        productOrderDO.setCreateTime(new Date());
+        productOrderDO.setDel(0);
+        productOrderDO.setOrderType(ProductOrderTypeEnum.DAILY.name());
+
+        //实际支付的价格
+        productOrderDO.setPayAmount(request.getRealPayAmount());
+
+        //总价，未使用优惠券的价格
+        productOrderDO.setTotalAmount(request.getTotalAmount());
+        productOrderDO.setState(ProductOrderStateEnum.NEW.name());
+        productOrderDO.setPayType(ProductOrderPayTypeEnum.valueOf(request.getPayType()).name());
+
+        productOrderDO.setReceiverAddress(JSON.toJSONString(addressVO));
+
+       this.save(productOrderDO);
+        return productOrderDO;
 
     }
 

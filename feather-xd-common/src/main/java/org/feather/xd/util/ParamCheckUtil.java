@@ -28,7 +28,7 @@ public class ParamCheckUtil {
     }
     public static void checkObjectNonNull(Object o,String msg) throws BizException {
         if (Objects.isNull(o)) {
-            throw new BizException(CommonConstant.DEFAULT_ERROR_CODE,msg);
+           throw new BizException(CommonConstant.DEFAULT_ERROR_CODE,msg);
         }
     }
 

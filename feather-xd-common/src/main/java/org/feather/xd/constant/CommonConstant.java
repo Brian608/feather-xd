@@ -21,5 +21,5 @@ public interface CommonConstant {
     /**
      * 默认错误码
      */
-     int ERROR_CODE = -1;
+    int DEFAULT_ERROR_CODE = -1;
 }
