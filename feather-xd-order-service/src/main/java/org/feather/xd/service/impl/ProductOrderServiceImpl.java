@@ -2,10 +2,14 @@ package org.feather.xd.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.extension.conditions.update.UpdateChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.feather.xd.config.RabbitMQConfig;
 import org.feather.xd.constant.CommonConstant;
 import org.feather.xd.enums.*;
@@ -322,5 +326,40 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     public String queryProductOrderState(String outTradeNo) {
         ProductOrderDO productOrderDO = Optional.ofNullable(this.baseMapper.selectOne(new LambdaQueryWrapper<ProductOrderDO>().eq(ProductOrderDO::getOutTradeNo, outTradeNo))).orElseThrow(() -> new BizException(BizCodeEnum.ORDER_CONFIRM_NOT_EXIST));
         return productOrderDO.getState();
+    }
+
+    @Override
+    public Boolean closeProductOrder(OrderMessage orderMessage) {
+        ProductOrderDO productOrderDO =
+                this.baseMapper.selectOne(
+                        new LambdaQueryWrapper<ProductOrderDO>()
+                                .eq(ProductOrderDO::getOutTradeNo, orderMessage.getOutTradeNo()));
+        if (Objects.isNull(productOrderDO)) {
+            log.warn("直接确认消息，订单不存在:[{}]",orderMessage);
+            return  true;
+        }
+        if (ProductOrderStateEnum.PAY.name().equalsIgnoreCase(productOrderDO.getState())){
+            log.info("直接确认消息，订单已支付:[{}]",orderMessage);
+            return true;
+        }
+        //TODO向第三方查询订单是否真的支付
+        String payResult="";
+        if(StringUtils.isBlank(payResult)){
+            updateOrderPayState(productOrderDO.getOutTradeNo(),ProductOrderStateEnum.CANCEL.name(),ProductOrderStateEnum.NEW.name());
+            log.info("结果为空，则未支付成功，本地取消订单:{}",orderMessage);
+            return true;
+        }else {
+            //支付成功，主动的把订单状态改成UI就支付，造成该原因的情况可能是支付通道回调有问题
+            log.warn("支付成功，主动的把订单状态改成UI就支付，造成该原因的情况可能是支付通道回调有问题:{}",orderMessage);
+            updateOrderPayState(productOrderDO.getOutTradeNo(),ProductOrderStateEnum.PAY.name(),ProductOrderStateEnum.NEW.name());
+            return true;
+        }
+    }
+    private   void  updateOrderPayState(String outTradeNo,  String newState,  String oldState){
+        this.update(
+                new LambdaUpdateWrapper<ProductOrderDO>().eq(ProductOrderDO::getOutTradeNo, outTradeNo).eq(ProductOrderDO::getState, oldState)
+                        .set(ProductOrderDO::getState, newState)
+        );
+
     }
 }

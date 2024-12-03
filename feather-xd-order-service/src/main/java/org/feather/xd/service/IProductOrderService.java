@@ -1,5 +1,6 @@
 package org.feather.xd.service;
 
+import org.feather.xd.model.OrderMessage;
 import org.feather.xd.model.ProductOrderDO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.feather.xd.request.ConfirmOrderRequest;
@@ -48,4 +49,14 @@ public interface IProductOrderService extends IService<ProductOrderDO> {
      * @return
      */
     String queryProductOrderState(String outTradeNo);
+
+
+    /**
+     * description: 队列监听，定时关单
+     * @param orderMessage
+     * @return {@link Boolean}
+     * @author: feather
+     * @since: 2024-12-03 20:33
+     **/
+    Boolean closeProductOrder(OrderMessage orderMessage);
 }
