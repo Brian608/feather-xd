@@ -1,5 +1,7 @@
 package org.feather.xd.config;
 
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -54,6 +56,28 @@ public class AlipayConfig {
      * 返回参数格式
      */
     public static final  String FORMAT="json";
+
+    private volatile static AlipayClient instance=null;
+
+
+    /**
+     * description: 单例模式获取 双重锁校验
+     * @param
+     * @return {@link AlipayClient}
+     * @author: feather
+     * @since: 2024-12-18 21:37
+     **/
+    public static AlipayClient getInstance(){
+        if (instance==null){
+            synchronized (AlipayConfig.class){
+                if (instance==null){
+                    instance=new DefaultAlipayClient(PAY_GATEWAY,APPID,APP_PRI_KEY,FORMAT,CHARSET,ALIPAY_PUB_KEY,SIGN_TYPE);
+
+                }
+            }
+        }
+        return instance;
+    }
 
 
 }
