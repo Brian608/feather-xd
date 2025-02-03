@@ -4,14 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.extension.conditions.update.UpdateChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Param;
+import org.feather.xd.component.PayFactory;
 import org.feather.xd.config.RabbitMQConfig;
 import org.feather.xd.constant.CommonConstant;
+import org.feather.xd.constant.TimeConstant;
 import org.feather.xd.enums.*;
 import org.feather.xd.exception.BizException;
 import org.feather.xd.feign.CouponFeignService;
@@ -31,10 +31,7 @@ import org.feather.xd.service.IProductOrderItemService;
 import org.feather.xd.service.IProductOrderService;
 import org.feather.xd.util.CommonUtil;
 import org.feather.xd.util.JsonResult;
-import org.feather.xd.vo.AddressVO;
-import org.feather.xd.vo.CartItemVO;
-import org.feather.xd.vo.CouponRecordVO;
-import org.feather.xd.vo.ProductOrderAddressVO;
+import org.feather.xd.vo.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -67,6 +64,7 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
 
     private final RabbitTemplate rabbitTemplate;
 
+    private final PayFactory payFactory;
 
     @Override
     public JsonResult confirmOrder(ConfirmOrderRequest request) {
@@ -99,7 +97,19 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
             orderMessage.setOutTradeNo(orderOutTradeNo);
             rabbitTemplate.convertAndSend(rabbitMQConfig.getEventExchange(),rabbitMQConfig.getOrderCloseDelayRoutingKey(),orderMessage);
 
+
             //创建支付
+            PayInfoVO payInfoVO = new PayInfoVO(orderOutTradeNo,
+                    productOrderDO.getPayAmount(),request.getPayType(),
+                    request.getClientType(), cartItemVOList.get(0).getProductTitle(),"", TimeConstant.ORDER_PAY_TIMEOUT_MILLS);
+            String payResult = payFactory.pay(payInfoVO);
+            if(StringUtils.isNotBlank(payResult)){
+                log.info("创建支付订单成功:payInfoVO={},payResult={}",payInfoVO,payResult);
+                return JsonResult.buildSuccess(payResult);
+            }else {
+                log.error("创建支付订单失败:payInfoVO={},payResult={}",payInfoVO,payResult);
+                return JsonResult.buildResult(BizCodeEnum.PAY_ORDER_FAIL);
+            }
 
         }
         return JsonResult.buildSuccess();
@@ -342,8 +352,11 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
             log.info("直接确认消息，订单已支付:[{}]",orderMessage);
             return true;
         }
-        //TODO向第三方查询订单是否真的支付
-        String payResult="";
+        //向第三方支付查询订单是否真的未支付
+        PayInfoVO payInfoVO = new PayInfoVO();
+        payInfoVO.setPayType(productOrderDO.getPayType());
+        payInfoVO.setOutTradeNo(orderMessage.getOutTradeNo());
+        String payResult = payFactory.queryPaySuccess(payInfoVO);
         if(StringUtils.isBlank(payResult)){
             updateOrderPayState(productOrderDO.getOutTradeNo(),ProductOrderStateEnum.CANCEL.name(),ProductOrderStateEnum.NEW.name());
             log.info("结果为空，则未支付成功，本地取消订单:{}",orderMessage);
