@@ -62,7 +62,7 @@ public class JsonResult<T> implements   java.io.Serializable {
      * @return
      */
     public static  <T> JsonResult<T> buildError(String msg) {
-        return new JsonResult<T>(CommonConstant.ERROR_CODE, null, msg);
+        return new JsonResult<T>(CommonConstant.DEFAULT_ERROR_CODE, null, msg);
     }
     /**
      * 失败，传入描述code 和错误信息

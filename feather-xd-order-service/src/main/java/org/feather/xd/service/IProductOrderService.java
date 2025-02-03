@@ -1,5 +1,6 @@
 package org.feather.xd.service;
 
+import org.feather.xd.enums.ProductOrderPayTypeEnum;
 import org.feather.xd.model.OrderMessage;
 import org.feather.xd.model.ProductOrderDO;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -7,6 +8,7 @@ import org.feather.xd.request.ConfirmOrderRequest;
 import org.feather.xd.util.JsonResult;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * <p>
@@ -59,4 +61,15 @@ public interface IProductOrderService extends IService<ProductOrderDO> {
      * @since: 2024-12-03 20:33
      **/
     Boolean closeProductOrder(OrderMessage orderMessage);
+
+    /**
+     * description:支付结果回调通知
+     * @param payType
+     * @param paramsMap
+     * @return {@link JsonResult}
+     * @author: feather
+     * @since: 2025-02-03 9:51
+     **/
+
+    JsonResult handlerOrderCallbackMsg(ProductOrderPayTypeEnum payType, Map<String, String> paramsMap);
 }
