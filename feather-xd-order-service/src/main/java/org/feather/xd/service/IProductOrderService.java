@@ -72,4 +72,15 @@ public interface IProductOrderService extends IService<ProductOrderDO> {
      **/
 
     JsonResult handlerOrderCallbackMsg(ProductOrderPayTypeEnum payType, Map<String, String> paramsMap);
+
+    /**
+     * description: 分页查询我的订房列表
+     * @param page
+     * @param size
+     * @param state
+     * @return {@link Map<String, Object>}
+     * @author: feather
+     * @since: 2025-02-09 10:06
+     **/
+    Map<String, Object> pagePOrder(int page, int size, String state);
 }

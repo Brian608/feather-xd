@@ -2,8 +2,11 @@ package org.feather.xd.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +62,8 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     private final CouponFeignService couponFeignService;
 
     private  final IProductOrderItemService productOrderItemService;
+
+    private final ProductOrderMapper productOrderMapper;
 
     private final RabbitMQConfig rabbitMQConfig;
 
@@ -397,5 +402,45 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
 
         return JsonResult.buildResult(BizCodeEnum.PAY_ORDER_CALLBACK_NOT_SUCCESS);
 
+    }
+
+    @Override
+    public Map<String, Object> pagePOrder(int page, int size, String state) {
+        LoginUser loginUser = LoginInterceptor.LOGIN_USER_THREAD_LOCAL.get();
+        Page<ProductOrderDO> pageInfo = new Page<>(page,size);
+
+        IPage<ProductOrderDO> orderDOPage = null;
+
+        if(StringUtils.isBlank(state)){
+            orderDOPage = productOrderMapper.selectPage(pageInfo,new QueryWrapper<ProductOrderDO>().eq("user_id",loginUser.getId()));
+        }else {
+            orderDOPage = productOrderMapper.selectPage(pageInfo,new QueryWrapper<ProductOrderDO>().eq("user_id",loginUser.getId()).eq("state",state));
+        }
+
+        //获取订单列表
+        List<ProductOrderDO> productOrderDOList =  orderDOPage.getRecords();
+        List<ProductOrderVO> productOrderVOList =  productOrderDOList.stream().map(orderDO->{
+
+            List<ProductOrderItemDO> itemDOList = productOrderItemService.list(new LambdaQueryWrapper<ProductOrderItemDO>().eq(ProductOrderItemDO::getProductOrderId,orderDO.getId()));
+
+            List<OrderItemVO> itemVOList =  itemDOList.stream().map(item->{
+                OrderItemVO itemVO = new OrderItemVO();
+                BeanUtils.copyProperties(item,itemVO);
+                return itemVO;
+            }).collect(Collectors.toList());
+
+            ProductOrderVO productOrderVO = new ProductOrderVO();
+            BeanUtils.copyProperties(orderDO,productOrderVO);
+            productOrderVO.setOrderItemList(itemVOList);
+            return productOrderVO;
+
+        }).collect(Collectors.toList());
+
+        Map<String,Object> pageMap = new HashMap<>(3);
+        pageMap.put("total_record",orderDOPage.getTotal());
+        pageMap.put("total_page",orderDOPage.getPages());
+        pageMap.put("current_data",productOrderVOList);
+
+        return pageMap;
     }
 }
