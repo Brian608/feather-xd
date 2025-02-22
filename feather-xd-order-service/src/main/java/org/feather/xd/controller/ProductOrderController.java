@@ -11,12 +11,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.feather.xd.config.AlipayConfig;
 import org.feather.xd.config.PayUrlConfig;
+import org.feather.xd.constant.CacheKey;
 import org.feather.xd.constant.CommonConstant;
 import org.feather.xd.enums.ClientType;
 import org.feather.xd.enums.ProductOrderPayTypeEnum;
+import org.feather.xd.interceptor.LoginInterceptor;
+import org.feather.xd.model.LoginUser;
 import org.feather.xd.request.ConfirmOrderRequest;
 import org.feather.xd.service.IProductOrderService;
+import org.feather.xd.util.CommonUtil;
 import org.feather.xd.util.JsonResult;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +31,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @projectName: feather-xd
@@ -47,6 +54,18 @@ public class ProductOrderController {
     private  final PayUrlConfig payUrlConfig;
 
      private final AlipayConfig alipayConfig;
+
+     private final StringRedisTemplate  redisTemplate;
+     @ApiOperation("获取体检订单令牌")
+     @GetMapping("/get_order_token")
+     public JsonResult<String> getOrderToken(){
+         LoginUser loginUser = LoginInterceptor.LOGIN_USER_THREAD_LOCAL.get();
+        String key= String.format(CacheKey.SUBMIT_ORDER_TOKEN_KEY,loginUser.getId());
+         String token = CommonUtil.getStringNumRandom(32);
+         redisTemplate.opsForValue().set(key,token,30, TimeUnit.MINUTES);
+         return JsonResult.buildSuccess(token);
+     }
+
 
 
 

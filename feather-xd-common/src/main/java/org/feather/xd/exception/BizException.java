@@ -43,7 +43,7 @@ public class BizException extends  RuntimeException{
     }
 
     public BizException(String msg){
-        this.code = CommonConstant.ERROR_CODE;
+        this.code = CommonConstant.DEFAULT_ERROR_CODE;
         this.msg = msg;
     }
 

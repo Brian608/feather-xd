@@ -5,6 +5,7 @@ import org.feather.xd.model.OrderMessage;
 import org.feather.xd.model.ProductOrderDO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.feather.xd.request.ConfirmOrderRequest;
+import org.feather.xd.request.RepayOrderRequest;
 import org.feather.xd.util.JsonResult;
 
 import javax.servlet.http.HttpServletResponse;
@@ -83,4 +84,13 @@ public interface IProductOrderService extends IService<ProductOrderDO> {
      * @since: 2025-02-09 10:06
      **/
     Map<String, Object> pagePOrder(int page, int size, String state);
+
+    /**
+     * description: 订单二次支付
+     * @param repayOrderRequest
+     * @return {@link JsonResult}
+     * @author: feather
+     * @since: 2025-02-09 11:29
+     **/
+    JsonResult repay(RepayOrderRequest repayOrderRequest);
 }
